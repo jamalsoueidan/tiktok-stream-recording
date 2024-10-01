@@ -1,0 +1,57 @@
+{
+  "name": "tiktok",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "build": "remix vite:build",
+    "dev": "remix vite:dev",
+    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "start": "remix-serve ./build/server/index.js",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@mantine/charts": "^7.13.1",
+    "@mantine/core": "7.13.1",
+    "@mantine/hooks": "7.13.1",
+    "@remix-run/node": "^2.9.2",
+    "@remix-run/react": "^2.9.2",
+    "@remix-run/serve": "^2.9.2",
+    "convex": "^1.16.3",
+    "convex-helpers": "^0.1.58",
+    "dayjs": "^1.11.13",
+    "flv.js": "^1.6.2",
+    "isbot": "^5.1.9",
+    "jsdom": "^25.0.1",
+    "node-html-parser": "^6.1.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-player": "^2.16.0",
+    "recharts": "^2.12.7",
+    "video.js": "^8.17.4"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.9.2",
+    "@types/jsdom": "^21.1.7",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "eslint": "^8.57.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.9.0",
+    "eslint-plugin-react": "^7.34.3",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "postcss": "^8.4.38",
+    "postcss-preset-mantine": "1.17.0",
+    "postcss-simple-vars": "^7.0.1",
+    "typescript": "^5.5.2",
+    "vite": "^5.3.1",
+    "vite-tsconfig-paths": "^4.3.2"
+  },
+  "packageManager": "yarn@4.5.0",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
