@@ -3,6 +3,7 @@ import { sendVideoAndThumbnail, uploadToBlobStorage } from "./azure";
 import { getTikTokStreams, Stream } from "./tiktok";
 
 const TIKTOK_CHANNEL = process.env.TIKTOK_CHANNEL;
+const FFMPEG_DURATION = process.env.FFMPEG_DURATION;
 
 const findBestStream = (
   streams: Stream[],
@@ -44,12 +45,16 @@ const findBestStream = (
       const videoOutput = `${filename}.flv`;
       const thumbnailOutput = `${filename}.jpg`;
 
-      ffmpeg(bestStream.url)
+      const ffmpegCommand = ffmpeg(bestStream.url)
         .output(videoOutput)
         .videoCodec("copy")
-        .audioCodec("copy")
-        .duration(5)
+        .audioCodec("copy");
 
+      if (FFMPEG_DURATION) {
+        ffmpegCommand.duration(FFMPEG_DURATION);
+      }
+
+      ffmpegCommand
         .on("start", () => {
           console.log("FFmpeg start");
         })

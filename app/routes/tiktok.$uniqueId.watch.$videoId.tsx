@@ -13,6 +13,7 @@ export default function Stream() {
 
   useEffect(() => {
     video({ id: params.videoId as Id<"video"> }).then(setUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!url) {

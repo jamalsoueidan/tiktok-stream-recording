@@ -4,7 +4,7 @@ import fs from "fs";
 export const uploadToBlobStorage = async (
   filePath: string,
   blobName: string,
-  blobContentType: "image/jpeg" | "video/x-flv"
+  blobContentType: "image/jpeg" | "video/x-flv" | "video/mp4"
 ) => {
   try {
     if (!process.env.AZURE_STORAGE_CONNECTION_STRING) {

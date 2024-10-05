@@ -11,37 +11,47 @@ import { pick } from "convex-helpers";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { action } from "./_generated/server";
+import { Container } from "./tables/container";
 import { Follower } from "./tables/follower";
 
-export const azure = action({
+function createClient() {
+  if (
+    !process.env.CREDENTIAL_TENANT_ID ||
+    !process.env.CREDENTIAL_CLIENT_ID ||
+    !process.env.CREDENTIAL_CLIENT_SECRET
+  ) {
+    throw new Error(
+      "Missing CREDENTIAL_TENANT_ID or CREDENTIAL_CLIENT_ID or CREDENTIAL_CLIENT_SECRET env values"
+    );
+  }
+
+  // Authenticate using (az ad sp create-for-rbac --name tiktok-jamalsoueidan --role contributor --scopes /subscriptions/7095268a-d926-4bd8-bc42-1b23d4987983)
+  const credential = new ClientSecretCredential(
+    process.env.CREDENTIAL_TENANT_ID,
+    process.env.CREDENTIAL_CLIENT_ID,
+    process.env.CREDENTIAL_CLIENT_SECRET
+  );
+
+  if (!process.env.SUBSCRIPTION_ID) {
+    throw new Error("Missing SUBSCRIPTION_ID env value");
+  }
+
+  // Create a client for Azure Container Instances
+  return new ContainerInstanceManagementClient(
+    credential,
+    process.env.SUBSCRIPTION_ID
+  );
+}
+
+export const startRecording = action({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
-    if (
-      !process.env.CREDENTIAL_TENANT_ID ||
-      !process.env.CREDENTIAL_CLIENT_ID ||
-      !process.env.CREDENTIAL_CLIENT_SECRET
-    ) {
-      throw new Error(
-        "Missing CREDENTIAL_TENANT_ID or CREDENTIAL_CLIENT_ID or CREDENTIAL_CLIENT_SECRET env values"
-      );
+    const container = await ctx.runQuery(internal.container.get, args);
+    if (container) {
+      throw new Error(`Container already started for ${args.uniqueId}`);
     }
 
-    // Authenticate using (az ad sp create-for-rbac --name tiktok-jamalsoueidan --role contributor --scopes /subscriptions/7095268a-d926-4bd8-bc42-1b23d4987983)
-    const credential = new ClientSecretCredential(
-      process.env.CREDENTIAL_TENANT_ID,
-      process.env.CREDENTIAL_CLIENT_ID,
-      process.env.CREDENTIAL_CLIENT_SECRET
-    );
-
-    if (!process.env.SUBSCRIPTION_ID) {
-      throw new Error("Missing SUBSCRIPTION_ID env value");
-    }
-
-    // Create a client for Azure Container Instances
-    const client = new ContainerInstanceManagementClient(
-      credential,
-      process.env.SUBSCRIPTION_ID
-    );
+    const client = createClient();
 
     if (!process.env.RESOURCE_GROUP) {
       throw new Error("Missing SUBSCRIPTION_ID env value");
@@ -49,7 +59,7 @@ export const azure = action({
 
     const containerName = cleanContainerName(args.uniqueId);
 
-    const response = await client.containerGroups.beginCreateOrUpdate(
+    await client.containerGroups.beginCreateOrUpdate(
       process.env.RESOURCE_GROUP,
       containerName, //container-name
       {
@@ -57,7 +67,7 @@ export const azure = action({
         containers: [
           {
             name: containerName,
-            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v7`,
+            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v9`,
             resources: {
               requests: {
                 cpu: 1,
@@ -92,8 +102,64 @@ export const azure = action({
       }
     );
 
-    console.log(response);
+    await ctx.runMutation(internal.container.insert, {
+      uniqueId: args.uniqueId,
+      containerName,
+      status: "STARTED",
+    });
+
     return { status: "Container started successfully" };
+  },
+});
+
+export const deleteContainerInstance = action({
+  args: pick(Container.withoutSystemFields, ["uniqueId"]),
+  handler: async (ctx, args) => {
+    if (!process.env.RESOURCE_GROUP) {
+      throw new Error("Missing SUBSCRIPTION_ID env value");
+    }
+
+    const container = await ctx.runQuery(internal.container.get, args);
+
+    if (!container) {
+      throw new Error("Container not found");
+    }
+
+    const client = createClient();
+
+    await client.containerGroups.beginDelete(
+      process.env.RESOURCE_GROUP,
+      container.containerName
+    );
+
+    await ctx.runMutation(internal.container.destroy, { id: container._id });
+
+    return { status: "Container is started to getting deleted " };
+  },
+});
+
+export const getContainerStatus = action({
+  args: pick(Container.withoutSystemFields, ["uniqueId"]),
+  handler: async (ctx, args) => {
+    if (!process.env.RESOURCE_GROUP) {
+      throw new Error("Missing SUBSCRIPTION_ID env value");
+    }
+
+    const container = await ctx.runQuery(internal.container.get, args);
+
+    if (!container) {
+      throw new Error("Container not found");
+    }
+
+    const client = createClient();
+
+    const containerGroup = await client.containerGroups.get(
+      process.env.RESOURCE_GROUP,
+      container.containerName
+    );
+    console.log(containerGroup.instanceView?.state);
+
+    return null;
   },
 });
 

@@ -6,7 +6,7 @@ import { internalMutation, internalQuery, query } from "./_generated/server";
 import { Log } from "./tables/log";
 
 export const save = internalMutation({
-  args: pick(Log.withoutSystemFields, ["uniqueId", "stats"]),
+  args: pick(Log.withoutSystemFields, ["uniqueId", "roomId"]),
   handler: (ctx, args) => {
     return ctx.db.insert("log", {
       ...args,

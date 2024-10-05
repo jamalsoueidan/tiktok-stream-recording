@@ -91,3 +91,11 @@ To get Log output for specific instance
 ```shell
 az container logs --resource-group tiktok --name streamp-rocessor-test
 ```
+
+## Cors
+
+Remember to add cors to the storage account, so you can stream from the frontend.
+
+1. Go to the storage account
+2. Go to Settings > Resource sharing (CORS)
+3. Add CORS rule \* \* \* \*

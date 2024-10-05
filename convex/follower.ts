@@ -1,4 +1,5 @@
 import { pick } from "convex-helpers";
+import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
@@ -14,9 +15,8 @@ import { Follower } from "./tables/follower";
 export const addFollower = action({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
-    const id = await ctx.runMutation(api.follower.insert, args);
+    await ctx.runMutation(api.follower.insert, args);
     await ctx.scheduler.runAfter(0, api.tiktok.checkUser, {
-      id,
       ...args,
     });
   },
@@ -57,6 +57,22 @@ export const paginate = query({
   },
 });
 
+export const getByUniqueId = internalQuery({
+  args: pick(Follower.withoutSystemFields, ["uniqueId"]),
+  handler: async (ctx, args) => {
+    const follower = await ctx.db
+      .query("follower")
+      .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
+      .unique();
+
+    if (!follower) {
+      throw new Error("Follower not found");
+    }
+
+    return follower._id;
+  },
+});
+
 export const get = query({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
@@ -87,20 +103,22 @@ export const getAllNotUpdated = internalQuery({
     ctx.db
       .query("follower")
       .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 30 * 60000)) // 60000 stands for one minute in milliseconds
-      .take(3),
+      .take(15),
 });
 
 export const update = internalMutation({
   args: {
     id: v.id("follower"),
-    ...pick(Follower.withoutSystemFields, [
-      "cronRunAt",
-      "avatarMedium",
-      "avatarLarger",
-      "nickname",
-      "signature",
-      "requireLogin",
-    ]),
+    ...partial(
+      pick(Follower.withoutSystemFields, [
+        "cronRunAt",
+        "avatarMedium",
+        "avatarLarger",
+        "nickname",
+        "signature",
+        "requireLogin",
+      ])
+    ),
   },
   handler: async (ctx, args) => {
     const { id, ...rest } = args;

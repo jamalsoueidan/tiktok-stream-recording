@@ -1,7 +1,7 @@
 import { pick } from "convex-helpers";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import {
   httpAction,
   internalMutation,
@@ -24,6 +24,7 @@ export const save = httpAction(async (ctx, request) => {
 
   const base64Data = thumbnail.replace(/^data:image\/jpeg;base64,/, "");
 
+  console.log("Saving video...", uniqueId);
   const binaryData = Uint8Array.from(atob(base64Data), (char) =>
     char.charCodeAt(0)
   );
@@ -36,6 +37,15 @@ export const save = httpAction(async (ctx, request) => {
     uniqueId,
     video,
     thumbnail: storageId,
+  });
+
+  await ctx.runAction(api.azure.deleteContainerInstance, {
+    uniqueId,
+  });
+
+  // we can do check after 2 minute, if we return live
+  await ctx.scheduler.runAfter(120 * 1000, api.tiktok.checkUser, {
+    uniqueId,
   });
 
   return new Response(null, {

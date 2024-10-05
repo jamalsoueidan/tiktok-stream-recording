@@ -1,21 +1,29 @@
 import { AspectRatio } from "@mantine/core";
 import { useParams } from "@remix-run/react";
 import { api } from "convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useAction } from "convex/react";
+import { useEffect, useState } from "react";
 import ReactPlayer from "react-player";
 
 export default function Stream() {
   const params = useParams();
-  const follower = useQuery(api.follower.get, {
-    uniqueId: params.uniqueId || "",
-  });
+  const [streams, setStreams] = useState<Array<{
+    name: string;
+    url: string;
+  }> | null>(null);
+  const getStreams = useAction(api.tiktok.getStreamData);
 
-  const log = follower?.log;
+  useEffect(() => {
+    getStreams({
+      roomId: params.roomId || "",
+    }).then(setStreams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return log?.stream?.flv_pull_url?.FULL_HD1 ? (
+  return streams && streams.length > 0 ? (
     <AspectRatio ratio={2 / 1}>
       <ReactPlayer
-        url={log?.stream?.flv_pull_url?.HD1}
+        url={streams[0].url}
         playing={false}
         controls
         width="100%"

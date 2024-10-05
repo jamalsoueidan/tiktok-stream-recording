@@ -100,10 +100,10 @@ export default function Index() {
               <Divider />
             </Card.Section>
             <Flex justify="flex-end" gap="md">
-              {log?.stream?.flv_pull_url?.FULL_HD1 ? (
+              {log?.live && log.roomId ? (
                 <Button
                   component={Link}
-                  to={`/tiktok/${follower.uniqueId}/stream`}
+                  to={`/tiktok/${follower.uniqueId}/stream/${log.roomId}`}
                   leftSection={<IconVideo />}
                 >
                   Watch stream
@@ -114,7 +114,6 @@ export default function Index() {
                 onClick={() => {
                   setLoading(true);
                   checkUser({
-                    id: follower._id,
                     uniqueId: follower.uniqueId,
                   }).then(() => {
                     setLoading(false);
@@ -162,14 +161,9 @@ export default function Index() {
           <Button onClick={() => loadMore(10)}>Load More</Button>
         ) : null}
       </Stack>
-      <Modal.Root opened={inOulet} onClose={() => navigate(-1)}>
-        <Modal.Overlay />
-        <Modal.Content>
-          <Modal.Body>
-            <Outlet />
-          </Modal.Body>
-        </Modal.Content>
-      </Modal.Root>
+      <Modal opened={inOulet} onClose={() => navigate(-1)} size="xl">
+        <Outlet />
+      </Modal>
     </Container>
   );
 }

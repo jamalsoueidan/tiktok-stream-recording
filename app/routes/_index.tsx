@@ -1,17 +1,22 @@
 import {
-  Avatar,
   Badge,
+  Box,
   Button,
   Card,
   Container,
   Flex,
+  Grid,
+  Group,
+  Image,
   Stack,
   Text,
   TextInput,
   Title,
+  UnstyledButton,
 } from "@mantine/core";
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
+import { IconBrandTiktok } from "@tabler/icons-react";
 import { api } from "convex/_generated/api";
 import { useAction, usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
@@ -31,7 +36,7 @@ export default function Index() {
   const { results, status, loadMore } = usePaginatedQuery(
     api.follower.paginate,
     {},
-    { initialNumItems: 30 }
+    { initialNumItems: 9 }
   );
   const [uniqueId, setUniqueId] = useState("");
   const addFollower = useAction(api.follower.addFollower);
@@ -57,30 +62,60 @@ export default function Index() {
             Add follower
           </Button>
         </Flex>
-        {results?.map((follower) => (
-          <Card
-            key={follower._id}
-            component={Link}
-            to={`/tiktok/${follower.uniqueId}`}
-          >
-            <Flex align="center" justify="space-between">
-              <Flex align="center" gap="sm">
-                <Avatar src={follower.avatarMedium} size="md" />
-                <Title fz="h4">{follower.uniqueId}</Title>
-                {follower.log?.live === true ? (
-                  <Badge color="green">Live</Badge>
-                ) : null}
-              </Flex>
-              <Text c="dimmed">
-                {follower.log?._creationTime
-                  ? "updated " +
-                    dayjs().from(dayjs(follower.log?._creationTime), true) +
-                    " ago"
-                  : null}
-              </Text>
-            </Flex>
-          </Card>
-        ))}
+        <Grid>
+          {results?.map((follower) => (
+            <Grid.Col span={{ base: 12, sm: 4 }} key={follower._id}>
+              <Card withBorder shadow="xs" p="xs">
+                <UnstyledButton
+                  component={Link}
+                  to={`/tiktok/${follower.uniqueId}`}
+                >
+                  <Stack gap="xs">
+                    <Image
+                      src={follower.avatarMedium}
+                      radius="md"
+                      w="100%"
+                      h="auto"
+                      fit="contain"
+                    />
+                    <Box>
+                      <Group>
+                        <Title order={3}>{follower.uniqueId}</Title>
+                        {follower.log?.live === true ? (
+                          <Badge color="green" size="lg">
+                            Live
+                          </Badge>
+                        ) : null}
+                      </Group>
+                      <Text fz="lg" c="dimmed">
+                        {follower.log?._creationTime
+                          ? "updated " +
+                            dayjs().from(
+                              dayjs(follower.log?._creationTime),
+                              true
+                            ) +
+                            " ago"
+                          : null}
+                      </Text>
+                    </Box>
+                  </Stack>
+                </UnstyledButton>
+                <Flex mt="xs" justify="flex-end">
+                  <Button
+                    component={Link}
+                    to={`https://www.tiktok.com/@${follower.uniqueId}`}
+                    target="_blank"
+                    color="black"
+                    leftSection={<IconBrandTiktok />}
+                    size="compact-xs"
+                  >
+                    See Tiktok
+                  </Button>
+                </Flex>
+              </Card>
+            </Grid.Col>
+          ))}
+        </Grid>
         <Button
           onClick={() => loadMore(10)}
           disabled={status !== "CanLoadMore"}
