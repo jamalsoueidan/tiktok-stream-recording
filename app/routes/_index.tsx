@@ -31,7 +31,7 @@ export default function Index() {
   const { results, status, loadMore } = usePaginatedQuery(
     api.follower.paginate,
     {},
-    { initialNumItems: 10 }
+    { initialNumItems: 30 }
   );
   const [uniqueId, setUniqueId] = useState("");
   const addFollower = useAction(api.follower.addFollower);
@@ -65,15 +65,16 @@ export default function Index() {
           >
             <Flex align="center" justify="space-between">
               <Flex align="center" gap="sm">
-                <Avatar src={follower.avatarMedium} size="lg" />
-                <Title order={2}>{follower.uniqueId}</Title>
+                <Avatar src={follower.avatarMedium} size="md" />
+                <Title fz="h4">{follower.uniqueId}</Title>
                 {follower.log?.live === true ? (
                   <Badge color="green">Live</Badge>
                 ) : null}
               </Flex>
-              <Text>
+              <Text c="dimmed">
                 {follower.log?._creationTime
-                  ? dayjs().from(dayjs(follower.log?._creationTime), true) +
+                  ? "updated " +
+                    dayjs().from(dayjs(follower.log?._creationTime), true) +
                     " ago"
                   : null}
               </Text>

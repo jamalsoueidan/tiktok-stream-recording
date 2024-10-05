@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import videojs from "video.js";
 import Player from "video.js/dist/types/player";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const VideoPlayer = (props: { options: any }) => {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
