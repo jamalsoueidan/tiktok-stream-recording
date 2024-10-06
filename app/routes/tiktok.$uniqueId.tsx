@@ -2,7 +2,6 @@ import { BubbleChart } from "@mantine/charts";
 import {
   Avatar,
   Badge,
-  Box,
   Button,
   Card,
   Container,
@@ -10,10 +9,8 @@ import {
   Flex,
   Image,
   Modal,
-  rem,
   Stack,
   Text,
-  ThemeIcon,
   Title,
 } from "@mantine/core";
 import {
@@ -23,7 +20,7 @@ import {
   useOutlet,
   useParams,
 } from "@remix-run/react";
-import { IconReload, IconVideo } from "@tabler/icons-react";
+
 import { api } from "convex/_generated/api";
 import { useAction, usePaginatedQuery, useQuery } from "convex/react";
 import dayjs from "dayjs";
@@ -42,6 +39,8 @@ export default function Index() {
   const stats = useQuery(api.log.stats, {
     uniqueId: params.uniqueId || "",
   });
+
+  console.log(stats);
   const { results, status, loadMore } = usePaginatedQuery(
     api.video.paginate,
     { uniqueId: params.uniqueId || "" },
@@ -104,13 +103,11 @@ export default function Index() {
                 <Button
                   component={Link}
                   to={`/tiktok/${follower.uniqueId}/stream/${log.roomId}`}
-                  leftSection={<IconVideo />}
                 >
                   Watch stream
                 </Button>
               ) : null}
               <Button
-                leftSection={<IconReload />}
                 onClick={() => {
                   setLoading(true);
                   checkUser({
@@ -133,20 +130,6 @@ export default function Index() {
               component={Link}
               to={`/tiktok/${video.uniqueId}/watch/${video._id}`}
             >
-              <Box
-                pos="absolute"
-                top="50%"
-                left="50%"
-                style={{ transform: "translate(-50%, -50%)" }}
-              >
-                <ThemeIcon size={rem(80)} radius="xl" opacity={0.7}>
-                  <IconVideo
-                    style={{ width: rem(80), height: rem(80) }}
-                    stroke={1.5}
-                    color="white"
-                  />
-                </ThemeIcon>
-              </Box>
               <Image
                 radius="md"
                 mah={200}

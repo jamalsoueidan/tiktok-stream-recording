@@ -42,8 +42,9 @@ export const stats = query({
   handler: async (ctx, args) => {
     const logs = await ctx.db
       .query("log")
-      .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
-      .filter((q) => q.eq(q.field("live"), true))
+      .withIndex("by_uniqueId_and_live", (q) =>
+        q.eq("uniqueId", args.uniqueId).eq("live", true)
+      )
       .collect();
 
     function roundToNearestHalfHour(time: number) {

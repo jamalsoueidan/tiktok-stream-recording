@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import ms from "ms";
 import { api, internal } from "./_generated/api";
 import { action, internalAction } from "./_generated/server";
 
@@ -99,11 +100,11 @@ export const checkAll = internalAction({
 
     console.log(`${users.length} users to check is streaming live`);
 
-    users.map((user, index) =>
-      ctx.scheduler.runAfter((index + 1) * 5000, api.tiktok.checkUser, {
+    for (const [index, user] of users.entries()) {
+      await ctx.scheduler.runAfter(ms(`${index * 3}s`), api.tiktok.checkUser, {
         uniqueId: user.uniqueId,
-      })
-    );
+      });
+    }
   },
 });
 
@@ -157,6 +158,8 @@ export const checkUser = action({
 
       if (!streams) {
         requireLogin = true;
+      } else {
+        await ctx.scheduler.runAfter(0, api.azure.startRecording, args);
       }
     }
 

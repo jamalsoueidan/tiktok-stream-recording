@@ -113,26 +113,29 @@ export const startRecording = action({
 });
 
 export const deleteContainerInstance = action({
-  args: pick(Container.withoutSystemFields, ["uniqueId"]),
+  args: {
+    ...pick(Container.withoutSystemFields, ["uniqueId"]),
+  },
   handler: async (ctx, args) => {
     if (!process.env.RESOURCE_GROUP) {
       throw new Error("Missing SUBSCRIPTION_ID env value");
     }
 
-    const container = await ctx.runQuery(internal.container.get, args);
+    const container = await ctx.runQuery(internal.container.get, {
+      uniqueId: args.uniqueId,
+    });
 
-    if (!container) {
-      throw new Error("Container not found");
+    if (container) {
+      console.log("Already started again, dont destroy");
+      return;
     }
 
     const client = createClient();
 
     await client.containerGroups.beginDelete(
       process.env.RESOURCE_GROUP,
-      container.containerName
+      cleanContainerName(args.uniqueId)
     );
-
-    await ctx.runMutation(internal.container.destroy, { id: container._id });
 
     return { status: "Container is started to getting deleted " };
   },

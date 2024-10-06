@@ -7,7 +7,7 @@
     "start": "ts-node-dev index.ts",
     "acr:login": "az acr login --name convextiktok",
     "docker:build": "docker build -t tiktok .",
-    "docker:run": "docker run -it --rm -e FFMPEG_DURATION=60 -e TIKTOK_CHANNEL=naydelin.asencio -e REQUEST_URL=\"https://hip-penguin-373.convex.site/postVideo\" -e AZURE_STORAGE_CONNECTION_STRING=\"DefaultEndpointsProtocol=https;AccountName=tiktokvideosstreaming;AccountKey=Ccb8N5+siNNHXunreHbVobHAIt0NkYELAUIcedeAhwcwTSatymEsLEFE1JhsEcmXEYthMb2XTw06+AStluomaA==;EndpointSuffix=core.windows.net\" tiktok",
+    "docker:run": "docker run -it --rm -e FFMPEG_DURATION=300 -e TIKTOK_CHANNEL=karl.kt.importa -e REQUEST_URL=\"https://hip-penguin-373.convex.site/postVideo\" -e AZURE_STORAGE_CONNECTION_STRING=\"DefaultEndpointsProtocol=https;AccountName=tiktokvideosstreaming;AccountKey=Ccb8N5+siNNHXunreHbVobHAIt0NkYELAUIcedeAhwcwTSatymEsLEFE1JhsEcmXEYthMb2XTw06+AStluomaA==;EndpointSuffix=core.windows.net\" tiktok",
     "docker:test": "npm run docker:build && npm run docker:run",
     "docker:tag": "docker tag tiktok convextiktok.azurecr.io/tiktok:v9",
     "docker:push": "docker push convextiktok.azurecr.io/tiktok:v9",

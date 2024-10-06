@@ -16,9 +16,9 @@ import {
 } from "@mantine/core";
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
-import { IconBrandTiktok } from "@tabler/icons-react";
+
 import { api } from "convex/_generated/api";
-import { useAction, usePaginatedQuery } from "convex/react";
+import { useAction, useMutation, usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useState } from "react";
@@ -38,8 +38,9 @@ export default function Index() {
     {},
     { initialNumItems: 9 }
   );
+  const unfollow = useMutation(api.follower.unfollow);
   const [uniqueId, setUniqueId] = useState("");
-  const addFollower = useAction(api.follower.addFollower);
+  const addFollower = useAction(api.follower.follow);
   return (
     <Container size="md" py="xl">
       <Stack>
@@ -60,6 +61,9 @@ export default function Index() {
             }}
           >
             Add follower
+          </Button>
+          <Button component={Link} to="/videos" color="green" size="xl">
+            Go Video
           </Button>
         </Flex>
         <Grid>
@@ -83,7 +87,7 @@ export default function Index() {
                         <Title order={3}>{follower.uniqueId}</Title>
                         {follower.log?.live === true ? (
                           <Badge color="green" size="lg">
-                            Live
+                            Live {follower.recording ? "(recording)" : null}
                           </Badge>
                         ) : null}
                       </Group>
@@ -100,13 +104,23 @@ export default function Index() {
                     </Box>
                   </Stack>
                 </UnstyledButton>
-                <Flex mt="xs" justify="flex-end">
+                <Flex mt="xs" justify="flex-end" gap="xs">
+                  <Button
+                    color="red"
+                    size="compact-xs"
+                    onClick={() =>
+                      unfollow({
+                        id: follower._id,
+                      })
+                    }
+                  >
+                    Unfollow
+                  </Button>
                   <Button
                     component={Link}
                     to={`https://www.tiktok.com/@${follower.uniqueId}`}
                     target="_blank"
                     color="black"
-                    leftSection={<IconBrandTiktok />}
                     size="compact-xs"
                   >
                     See Tiktok

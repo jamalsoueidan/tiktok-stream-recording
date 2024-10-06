@@ -42,14 +42,14 @@ const findBestStream = (
         .split(".")[0];
 
       const filename = `${channel}_${bestStream.name}_${timestamp}`;
-      const videoOutput = `${filename}.flv`;
+      const videoOutput = `${filename}.mp4`;
       const thumbnailOutput = `${filename}.jpg`;
 
       const ffmpegCommand = ffmpeg(bestStream.url)
         .output(videoOutput)
         .videoCodec("copy")
-        .audioCodec("copy");
-
+        .audioCodec("copy")
+        .outputOptions("-movflags", "faststart");
       if (FFMPEG_DURATION) {
         ffmpegCommand.duration(FFMPEG_DURATION);
       }
@@ -62,7 +62,7 @@ const findBestStream = (
         .on("end", async () => {
           console.log("Video created successfully!");
 
-          await uploadToBlobStorage(videoOutput, videoOutput, "video/x-flv");
+          await uploadToBlobStorage(videoOutput, videoOutput, "video/mp4");
 
           ffmpeg(videoOutput)
             .screenshots({

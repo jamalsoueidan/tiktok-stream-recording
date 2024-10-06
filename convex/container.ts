@@ -8,8 +8,9 @@ export const get = internalQuery({
   handler: async (ctx, args) => {
     return ctx.db
       .query("container")
-      .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
-      .filter((q) => q.eq(q.field("status"), "STARTED"))
+      .withIndex("by_uniqueId_and_status", (q) =>
+        q.eq("uniqueId", args.uniqueId).eq("status", "STARTED")
+      )
       .first();
   },
 });

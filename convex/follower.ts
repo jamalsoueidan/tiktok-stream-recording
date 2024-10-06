@@ -12,14 +12,19 @@ import {
 } from "./_generated/server";
 import { Follower } from "./tables/follower";
 
-export const addFollower = action({
+export const follow = action({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     await ctx.runMutation(api.follower.insert, args);
-    await ctx.scheduler.runAfter(0, api.tiktok.checkUser, {
-      ...args,
-    });
+    await ctx.scheduler.runAfter(0, api.tiktok.checkUser, args);
   },
+});
+
+export const unfollow = mutation({
+  args: {
+    id: v.id("follower"),
+  },
+  handler: (ctx, args) => ctx.db.delete(args.id),
 });
 
 export const insert = mutation({
@@ -46,7 +51,16 @@ export const paginate = query({
           .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
           .order("desc")
           .first();
-        return { ...follower, log };
+
+        const container = await ctx.db
+          .query("container")
+          .withIndex("by_uniqueId_and_status", (q) =>
+            q.eq("uniqueId", follower.uniqueId).eq("status", "STARTED")
+          )
+          .order("desc")
+          .first();
+
+        return { ...follower, log, recording: container ? true : false };
       })
     );
 

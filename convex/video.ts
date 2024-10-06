@@ -1,6 +1,7 @@
 import { pick } from "convex-helpers";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import ms from "ms";
 import { api, internal } from "./_generated/api";
 import {
   httpAction,
@@ -39,18 +40,47 @@ export const save = httpAction(async (ctx, request) => {
     thumbnail: storageId,
   });
 
-  await ctx.runAction(api.azure.deleteContainerInstance, {
+  //terminate container after 10min
+  await ctx.scheduler.runAfter(ms("10m"), api.azure.deleteContainerInstance, {
     uniqueId,
   });
 
-  // we can do check after 2 minute, if we return live
-  await ctx.scheduler.runAfter(120 * 1000, api.tiktok.checkUser, {
-    uniqueId,
-  });
+  const container = await ctx.runQuery(internal.container.get, { uniqueId });
+  if (container) {
+    //update the container instance that its deleted
+    await ctx.runMutation(internal.container.destroy, { id: container._id });
+
+    //check user if he came back after 2m, sometime disconnection happens in tiktok live
+    await ctx.scheduler.runAfter(ms("2m"), api.tiktok.checkUser, {
+      uniqueId,
+    });
+  }
 
   return new Response(null, {
     status: 200,
   });
+});
+
+export const paginateAll = query({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const paginate = await ctx.db
+      .query("video")
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    const page = await Promise.all(
+      paginate.page.map(async (video) => {
+        const thumbnail_url = await ctx.storage.getUrl(video.thumbnail);
+        return { ...video, thumbnail_url };
+      })
+    );
+
+    return {
+      ...paginate,
+      page,
+    };
+  },
 });
 
 export const paginate = query({

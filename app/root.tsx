@@ -1,6 +1,5 @@
 import "@mantine/charts/styles.css";
 import "@mantine/core/styles.css";
-import "video.js/dist/video-js.css";
 
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 import {
