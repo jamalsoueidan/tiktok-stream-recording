@@ -1,6 +1,6 @@
 # TikTok Stream Recording and Upload Project
 
-This project is designed to automate the process of recording live TikTok streams, storing them in Azure Blob Storage, and managing video access through expiring URLs. The project uses **Azure Container Instances**, **Azure Blob Storage**, **Convex** for backend logic, and **FFmpeg** to handle video recording and processing.
+This project is designed to automate the process of recording live TikTok streams, storing them in Azure Blob Storage, and managing video access through expiring URLs. Setup the project, and then just follow tiktok users in the web app, and then it will automatically record their stream when they are live.
 
 ## Features
 
