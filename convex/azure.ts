@@ -57,6 +57,7 @@ export const startRecording = action({
       throw new Error("Missing SUBSCRIPTION_ID env value");
     }
 
+    console.log("Starting recording for", args.uniqueId);
     const containerName = cleanContainerName(args.uniqueId);
 
     await client.containerGroups.beginCreateOrUpdate(
@@ -67,7 +68,7 @@ export const startRecording = action({
         containers: [
           {
             name: containerName,
-            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v9`,
+            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v12`,
             resources: {
               requests: {
                 cpu: 1,
@@ -84,8 +85,12 @@ export const startRecording = action({
                 value: process.env.STORAGE_CONNECTION,
               },
               {
-                name: "REQUEST_URL",
+                name: "POST_VIDEO_URL",
                 value: `${process.env.CONVEX_SITE_URL}/postVideo`,
+              },
+              {
+                name: "UPDATE_VIDEO_URL",
+                value: `${process.env.CONVEX_SITE_URL}/updateVideo`,
               },
             ],
           },
@@ -130,6 +135,7 @@ export const deleteContainerInstance = action({
       return;
     }
 
+    console.log("Deleting container", args.uniqueId);
     const client = createClient();
 
     await client.containerGroups.beginDelete(

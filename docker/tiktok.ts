@@ -1,3 +1,5 @@
+import { sendUpdate } from "./convex";
+
 // Define types
 interface LiveRoomInfo {
   status: number;
@@ -118,25 +120,23 @@ async function getStreamData(roomId: string): Promise<Stream[] | null> {
 }
 
 export async function getTikTokStreams(channel: string): Promise<Stream[]> {
-  console.log("Channel:", channel);
+  await sendUpdate(channel, "Container Instance started");
 
   const roomId = await getRoomId(channel);
   if (!roomId) {
-    console.error("Could not find room ID");
+    await sendUpdate(channel, "Could not find room ID");
     return [];
   }
 
-  console.log("RoomId:", roomId);
+  await sendUpdate(channel, "RoomId found for");
 
   const liveRoomDetails = await getLiveRoomDetails(roomId);
   if (!liveRoomDetails) {
-    console.error("Could not find liveRoom details");
+    await sendUpdate(channel, "Could not find liveRoom details");
     return [];
   }
 
-  console.log(
-    `Live stream by ${liveRoomDetails.ownerInfo.nickname}: ${liveRoomDetails.title}`
-  );
+  await sendUpdate(channel, `Live stream details found for`);
 
   const streams = await getStreamData(roomId);
   return streams || [];

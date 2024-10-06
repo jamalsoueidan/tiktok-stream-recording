@@ -20,12 +20,21 @@ export const get = internalQuery({
   },
 });
 
+export const update = httpAction(async (ctx, request) => {
+  const { uniqueId, message } = await request.json();
+
+  console.log(uniqueId, message);
+  return new Response(null, {
+    status: 200,
+  });
+});
+
 export const save = httpAction(async (ctx, request) => {
   const { uniqueId, video, thumbnail } = await request.json();
 
   const base64Data = thumbnail.replace(/^data:image\/jpeg;base64,/, "");
 
-  console.log("Saving video...", uniqueId);
+  console.log("Saving video for", uniqueId);
   const binaryData = Uint8Array.from(atob(base64Data), (char) =>
     char.charCodeAt(0)
   );
@@ -47,13 +56,21 @@ export const save = httpAction(async (ctx, request) => {
 
   const container = await ctx.runQuery(internal.container.get, { uniqueId });
   if (container) {
+    console.log("Destroy container for", uniqueId);
     //update the container instance that its deleted
     await ctx.runMutation(internal.container.destroy, { id: container._id });
+
+    //put the user offline if thats the case.
+    await ctx.runAction(api.tiktok.checkUser, {
+      uniqueId,
+    });
 
     //check user if he came back after 2m, sometime disconnection happens in tiktok live
     await ctx.scheduler.runAfter(ms("2m"), api.tiktok.checkUser, {
       uniqueId,
     });
+  } else {
+    console.log("Container not found for", uniqueId);
   }
 
   return new Response(null, {

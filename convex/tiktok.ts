@@ -67,7 +67,14 @@ export const getStreamData = action({
   },
   handler: async (ctx, args) => {
     const url = URL_WEBCAST_ROOM_INFO.replace("{room_id}", args.roomId);
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: "sessionid_ss=test; tt-target-idc=useast2a;",
+      },
+      credentials: "include", // This ensures that cookies are sent in the request
+    });
     const data = await response.json();
 
     const streamUrl =
@@ -75,6 +82,7 @@ export const getStreamData = action({
 
     if (!streamUrl) {
       console.error("The stream is inaccessible");
+
       return null;
     }
 
@@ -113,9 +121,17 @@ export const checkUser = action({
     uniqueId: v.string(),
   },
   handler: async (ctx, args) => {
-    const followerId = await ctx.runQuery(internal.follower.getByUniqueId, {
+    console.log(`Checking user ${args.uniqueId}`);
+    const follower = await ctx.runQuery(internal.follower.getByUniqueId, {
       uniqueId: args.uniqueId,
     });
+
+    if (!follower) {
+      console.log(`User ${args.uniqueId} not found`);
+      return;
+    }
+
+    const followerId = follower._id;
 
     await ctx.runMutation(internal.follower.update, {
       id: followerId,
@@ -137,6 +153,7 @@ export const checkUser = action({
         id: followerId,
         requireLogin: true,
       });
+
       return;
     }
 
@@ -152,6 +169,7 @@ export const checkUser = action({
 
     let requireLogin = false;
     if (live) {
+      console.log(`User ${args.uniqueId}`, "is streaming live");
       const streams = await ctx.runAction(api.tiktok.getStreamData, {
         roomId,
       });
@@ -159,8 +177,11 @@ export const checkUser = action({
       if (!streams) {
         requireLogin = true;
       } else {
+        console.log("Lets trigger start recording for", args.uniqueId);
         await ctx.scheduler.runAfter(0, api.azure.startRecording, args);
       }
+    } else {
+      console.log(`User ${args.uniqueId}`, "is offline");
     }
 
     await ctx.runMutation(internal.follower.update, {

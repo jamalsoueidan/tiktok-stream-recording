@@ -28,34 +28,3 @@ export const uploadToBlobStorage = async (
     console.error("Error uploading to Blob Storage:", error);
   }
 };
-
-export const sendVideoAndThumbnail = async (
-  uniqueId: string,
-  video: string,
-  thumbnail: string
-) => {
-  if (!process.env.REQUEST_URL) {
-    console.log("REQUEST_URL is not defined");
-    return;
-  }
-
-  const fileBuffer = fs.readFileSync(thumbnail);
-
-  const response = await fetch(process.env.REQUEST_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      uniqueId,
-      video,
-      thumbnail: fileBuffer.toString("base64"),
-    }),
-  });
-
-  if (response.ok) {
-    console.log("Data sent successfully!");
-  } else {
-    console.log(`Failed to send data: ${response.statusText}`);
-  }
-};

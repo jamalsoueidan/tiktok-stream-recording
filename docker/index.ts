@@ -1,5 +1,6 @@
 import ffmpeg from "fluent-ffmpeg";
-import { sendVideoAndThumbnail, uploadToBlobStorage } from "./azure";
+import { uploadToBlobStorage } from "./azure";
+import { sendUpdate, sendVideoAndThumbnail } from "./convex";
 import { getTikTokStreams, Stream } from "./tiktok";
 
 const TIKTOK_CHANNEL = process.env.TIKTOK_CHANNEL;
@@ -21,7 +22,7 @@ const findBestStream = (
 (async () => {
   const channel = TIKTOK_CHANNEL;
   if (!channel) {
-    console.log("No channel provided");
+    await sendUpdate("", "No channel provided");
     return;
   }
   const streams = await getTikTokStreams(channel);
@@ -31,7 +32,8 @@ const findBestStream = (
     const bestStream = findBestStream(streams, priority);
 
     if (bestStream) {
-      console.log(
+      await sendUpdate(
+        channel,
         `Downloading ${bestStream.name.toUpperCase()} stream: ${bestStream.url}`
       );
 
@@ -55,12 +57,12 @@ const findBestStream = (
       }
 
       ffmpegCommand
-        .on("start", () => {
-          console.log("FFmpeg start");
+        .on("start", async () => {
+          await sendUpdate(channel, `FFmpeg started recording live stream`);
         })
 
         .on("end", async () => {
-          console.log("Video created successfully!");
+          await sendUpdate(channel, "Start uploading VIDEO");
 
           await uploadToBlobStorage(videoOutput, videoOutput, "video/mp4");
 
@@ -71,7 +73,7 @@ const findBestStream = (
               filename: thumbnailOutput,
             })
             .on("end", async () => {
-              console.log("Thumbnail created successfully!");
+              await sendUpdate(channel, "Start uploading IMAGE...");
 
               await uploadToBlobStorage(
                 thumbnailOutput,
@@ -79,11 +81,15 @@ const findBestStream = (
                 "image/jpeg"
               );
 
+              await sendUpdate(channel, "Send video & image to Convex");
+
               await sendVideoAndThumbnail(
                 channel,
                 videoOutput,
                 thumbnailOutput
               );
+
+              await sendUpdate(channel, "Finished streaming");
             })
             .on("error", (err) => {
               console.error("Error creating thumbnail:", err);

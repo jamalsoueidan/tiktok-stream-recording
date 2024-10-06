@@ -27,14 +27,6 @@ export default function Stream() {
         controls
         width="100%"
         height="100%"
-        config={{
-          file: {
-            forceFLV: true,
-            attributes: {
-              controls: true,
-            },
-          },
-        }}
       />
     </AspectRatio>
   );

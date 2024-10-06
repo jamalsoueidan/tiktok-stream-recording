@@ -63,7 +63,10 @@ export default function Index() {
             Add follower
           </Button>
           <Button component={Link} to="/videos" color="green" size="xl">
-            Go Video
+            Videos
+          </Button>
+          <Button component={Link} to="/monitor" color="yellow" size="xl">
+            Monitor
           </Button>
         </Flex>
         <Grid>

@@ -40,7 +40,6 @@ export default function Index() {
     uniqueId: params.uniqueId || "",
   });
 
-  console.log(stats);
   const { results, status, loadMore } = usePaginatedQuery(
     api.video.paginate,
     { uniqueId: params.uniqueId || "" },

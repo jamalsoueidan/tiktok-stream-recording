@@ -2,7 +2,7 @@ import { pick } from "convex-helpers";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import {
   action,
   internalMutation,
@@ -15,7 +15,16 @@ import { Follower } from "./tables/follower";
 export const follow = action({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
-    await ctx.runMutation(api.follower.insert, args);
+    if (args.uniqueId.length === 0) {
+      throw new Error("Follower uniqueId is required");
+    }
+
+    const follower = await ctx.runQuery(internal.follower.getByUniqueId, args);
+    if (follower) {
+      throw new Error("Follower already exists");
+    }
+
+    await ctx.runMutation(internal.follower.insert, args);
     await ctx.scheduler.runAfter(0, api.tiktok.checkUser, args);
   },
 });
@@ -27,7 +36,7 @@ export const unfollow = mutation({
   handler: (ctx, args) => ctx.db.delete(args.id),
 });
 
-export const insert = mutation({
+export const insert = internalMutation({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: (ctx, args) =>
     ctx.db.insert("follower", {
@@ -73,18 +82,11 @@ export const paginate = query({
 
 export const getByUniqueId = internalQuery({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
-  handler: async (ctx, args) => {
-    const follower = await ctx.db
+  handler: async (ctx, args) =>
+    ctx.db
       .query("follower")
       .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
-      .unique();
-
-    if (!follower) {
-      throw new Error("Follower not found");
-    }
-
-    return follower._id;
-  },
+      .unique(),
 });
 
 export const get = query({
@@ -116,7 +118,7 @@ export const getAllNotUpdated = internalQuery({
   handler: async (ctx) =>
     ctx.db
       .query("follower")
-      .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 30 * 60000)) // 60000 stands for one minute in milliseconds
+      .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 15 * 60000)) // 60000 stands for one minute in milliseconds
       .take(15),
 });
 
