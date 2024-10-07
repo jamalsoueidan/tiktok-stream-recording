@@ -1,5 +1,6 @@
 import { BlobServiceClient } from "@azure/storage-blob";
 import fs from "fs";
+import { sendUpdate } from "./convex";
 
 export const uploadToBlobStorage = async (
   filePath: string,
@@ -23,7 +24,7 @@ export const uploadToBlobStorage = async (
       blobHTTPHeaders: { blobContentType },
     });
 
-    console.log(`Upload of ${blobName} to Azure Blob Storage successful!`);
+    await sendUpdate(`Upload of ${blobName} to Azure Blob Storage successful!`);
   } catch (error) {
     console.error("Error uploading to Blob Storage:", error);
   }

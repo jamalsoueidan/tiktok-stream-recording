@@ -16,12 +16,13 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as azure from "../azure.js";
-import type * as container from "../container.js";
+import type * as containerLog from "../containerLog.js";
 import type * as crons from "../crons.js";
 import type * as follower from "../follower.js";
 import type * as http from "../http.js";
+import type * as httpActions from "../httpActions.js";
 import type * as log from "../log.js";
-import type * as tables_container from "../tables/container.js";
+import type * as tables_container_log from "../tables/container_log.js";
 import type * as tables_follower from "../tables/follower.js";
 import type * as tables_log from "../tables/log.js";
 import type * as tables_video from "../tables/video.js";
@@ -38,12 +39,13 @@ import type * as video from "../video.js";
  */
 declare const fullApi: ApiFromModules<{
   azure: typeof azure;
-  container: typeof container;
+  containerLog: typeof containerLog;
   crons: typeof crons;
   follower: typeof follower;
   http: typeof http;
+  httpActions: typeof httpActions;
   log: typeof log;
-  "tables/container": typeof tables_container;
+  "tables/container_log": typeof tables_container_log;
   "tables/follower": typeof tables_follower;
   "tables/log": typeof tables_log;
   "tables/video": typeof tables_video;

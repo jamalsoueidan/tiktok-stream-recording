@@ -9,10 +9,10 @@ import {
 } from "@azure/storage-blob";
 import { pick } from "convex-helpers";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { action } from "./_generated/server";
-import { Container } from "./tables/container";
 import { Follower } from "./tables/follower";
+import { Video } from "./tables/video";
 
 function createClient() {
   if (
@@ -46,19 +46,29 @@ function createClient() {
 export const startRecording = action({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
-    const container = await ctx.runQuery(internal.container.get, args);
-    if (container) {
-      throw new Error(`Container already started for ${args.uniqueId}`);
-    }
-
-    const client = createClient();
-
     if (!process.env.RESOURCE_GROUP) {
       throw new Error("Missing SUBSCRIPTION_ID env value");
     }
 
-    console.log("Starting recording for", args.uniqueId);
+    const client = createClient();
     const containerName = cleanContainerName(args.uniqueId);
+
+    const status = await ctx.runAction(api.azure.getContainerStatus, args);
+
+    if (status === "Running") {
+      console.log(
+        "Container is already running. No need to start a new instance."
+      );
+      return { status: "Container already started" };
+    }
+
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/T/, "-")
+      .replace(/:/g, "-")
+      .split(".")[0];
+
+    console.log("Starting recording for", args.uniqueId);
 
     await client.containerGroups.beginCreateOrUpdate(
       process.env.RESOURCE_GROUP,
@@ -68,7 +78,7 @@ export const startRecording = action({
         containers: [
           {
             name: containerName,
-            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v12`,
+            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v13`,
             resources: {
               requests: {
                 cpu: 1,
@@ -81,16 +91,24 @@ export const startRecording = action({
                 value: args.uniqueId,
               },
               {
+                name: "FILENAME",
+                value: `${args.uniqueId}_${timestamp}`,
+              },
+              {
                 name: "AZURE_STORAGE_CONNECTION_STRING",
                 value: process.env.STORAGE_CONNECTION,
+              },
+              {
+                name: "POST_IMAGE_URL",
+                value: `${process.env.CONVEX_SITE_URL}/postImage`,
               },
               {
                 name: "POST_VIDEO_URL",
                 value: `${process.env.CONVEX_SITE_URL}/postVideo`,
               },
               {
-                name: "UPDATE_VIDEO_URL",
-                value: `${process.env.CONVEX_SITE_URL}/updateVideo`,
+                name: "UPDATES_URL",
+                value: `${process.env.CONVEX_SITE_URL}/updates`,
               },
             ],
           },
@@ -107,68 +125,59 @@ export const startRecording = action({
       }
     );
 
-    await ctx.runMutation(internal.container.insert, {
-      uniqueId: args.uniqueId,
-      containerName,
-      status: "STARTED",
-    });
-
     return { status: "Container started successfully" };
   },
 });
 
-export const deleteContainerInstance = action({
+export const terminateContainer = action({
   args: {
-    ...pick(Container.withoutSystemFields, ["uniqueId"]),
+    ...pick(Video.withoutSystemFields, ["uniqueId"]),
   },
   handler: async (ctx, args) => {
     if (!process.env.RESOURCE_GROUP) {
       throw new Error("Missing SUBSCRIPTION_ID env value");
     }
 
-    const container = await ctx.runQuery(internal.container.get, {
-      uniqueId: args.uniqueId,
-    });
-
-    if (container) {
-      console.log("Already started again, dont destroy");
-      return;
-    }
-
-    console.log("Deleting container", args.uniqueId);
     const client = createClient();
+    const status = await ctx.runAction(api.azure.getContainerStatus, args);
+
+    if (status === "Running") {
+      console.log("Container is running. Cannot terminate.", args.uniqueId);
+      return { status: "Container is running. Cannot terminate" };
+    }
 
     await client.containerGroups.beginDelete(
       process.env.RESOURCE_GROUP,
       cleanContainerName(args.uniqueId)
     );
 
+    console.log("Terminat container", args.uniqueId);
     return { status: "Container is started to getting deleted " };
   },
 });
 
 export const getContainerStatus = action({
-  args: pick(Container.withoutSystemFields, ["uniqueId"]),
+  args: pick(Video.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     if (!process.env.RESOURCE_GROUP) {
-      throw new Error("Missing SUBSCRIPTION_ID env value");
-    }
-
-    const container = await ctx.runQuery(internal.container.get, args);
-
-    if (!container) {
-      throw new Error("Container not found");
+      throw new Error("Missing RESOURCE_GROUP env value");
     }
 
     const client = createClient();
+    const containerName = cleanContainerName(args.uniqueId);
 
-    const containerGroup = await client.containerGroups.get(
-      process.env.RESOURCE_GROUP,
-      container.containerName
-    );
-    console.log(containerGroup.instanceView?.state);
-
-    return null;
+    try {
+      const containerGroup = await client.containerGroups.get(
+        process.env.RESOURCE_GROUP,
+        containerName
+      );
+      return containerGroup.instanceView?.state as
+        | "Running"
+        | "Stopped"
+        | undefined;
+    } catch (error) {
+      return undefined;
+    }
   },
 });
 
@@ -179,7 +188,7 @@ export const generateURL = action({
   },
   handler: async (ctx, args) => {
     const video = await ctx.runQuery(internal.video.get, { id: args.id });
-    if (!video) {
+    if (!video || !video.video) {
       throw new Error("Video not found");
     }
 

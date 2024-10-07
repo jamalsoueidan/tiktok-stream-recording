@@ -1,14 +1,8 @@
 import { pick } from "convex-helpers";
+import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import ms from "ms";
-import { api, internal } from "./_generated/api";
-import {
-  httpAction,
-  internalMutation,
-  internalQuery,
-  query,
-} from "./_generated/server";
+import { internalMutation, internalQuery, query } from "./_generated/server";
 import { Video } from "./tables/video";
 
 export const get = internalQuery({
@@ -18,64 +12,6 @@ export const get = internalQuery({
   handler: async (ctx, args) => {
     return ctx.db.get(args.id);
   },
-});
-
-export const update = httpAction(async (ctx, request) => {
-  const { uniqueId, message } = await request.json();
-
-  console.log(uniqueId, message);
-  return new Response(null, {
-    status: 200,
-  });
-});
-
-export const save = httpAction(async (ctx, request) => {
-  const { uniqueId, video, thumbnail } = await request.json();
-
-  const base64Data = thumbnail.replace(/^data:image\/jpeg;base64,/, "");
-
-  console.log("Saving video for", uniqueId);
-  const binaryData = Uint8Array.from(atob(base64Data), (char) =>
-    char.charCodeAt(0)
-  );
-
-  const storageId = await ctx.storage.store(
-    new Blob([binaryData], { type: "image/jpeg" })
-  );
-
-  await ctx.runMutation(internal.video.insert, {
-    uniqueId,
-    video,
-    thumbnail: storageId,
-  });
-
-  //terminate container after 10min
-  await ctx.scheduler.runAfter(ms("10m"), api.azure.deleteContainerInstance, {
-    uniqueId,
-  });
-
-  const container = await ctx.runQuery(internal.container.get, { uniqueId });
-  if (container) {
-    console.log("Destroy container for", uniqueId);
-    //update the container instance that its deleted
-    await ctx.runMutation(internal.container.destroy, { id: container._id });
-
-    //put the user offline if thats the case.
-    await ctx.runAction(api.tiktok.checkUser, {
-      uniqueId,
-    });
-
-    //check user if he came back after 2m, sometime disconnection happens in tiktok live
-    await ctx.scheduler.runAfter(ms("2m"), api.tiktok.checkUser, {
-      uniqueId,
-    });
-  } else {
-    console.log("Container not found for", uniqueId);
-  }
-
-  return new Response(null, {
-    status: 200,
-  });
 });
 
 export const paginateAll = query({
@@ -88,8 +24,11 @@ export const paginateAll = query({
 
     const page = await Promise.all(
       paginate.page.map(async (video) => {
-        const thumbnail_url = await ctx.storage.getUrl(video.thumbnail);
-        return { ...video, thumbnail_url };
+        if (video.image) {
+          const thumbnail_url = await ctx.storage.getUrl(video.image);
+          return { ...video, thumbnail_url };
+        }
+        return video;
       })
     );
 
@@ -114,8 +53,11 @@ export const paginate = query({
 
     const page = await Promise.all(
       paginate.page.map(async (video) => {
-        const thumbnail_url = await ctx.storage.getUrl(video.thumbnail);
-        return { ...video, thumbnail_url };
+        if (video.image) {
+          const thumbnail_url = await ctx.storage.getUrl(video.image);
+          return { ...video, thumbnail_url };
+        }
+        return video;
       })
     );
 
@@ -132,5 +74,26 @@ export const insert = internalMutation({
   },
   handler: async (ctx, args) => {
     return ctx.db.insert("video", args);
+  },
+});
+
+export const getByFilename = internalQuery({
+  args: pick(Video.withoutSystemFields, ["filename"]),
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("video")
+      .withIndex("by_filename", (q) => q.eq("filename", args.filename))
+      .first();
+  },
+});
+
+export const update = internalMutation({
+  args: {
+    id: v.id("video"),
+    ...partial(Video.withoutSystemFields),
+  },
+  handler: async (convexToJson, args) => {
+    const { id, ...rest } = args;
+    return convexToJson.db.patch(id, rest);
   },
 });

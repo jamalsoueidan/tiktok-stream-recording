@@ -61,15 +61,15 @@ export const paginate = query({
           .order("desc")
           .first();
 
-        const container = await ctx.db
-          .query("container")
-          .withIndex("by_uniqueId_and_status", (q) =>
-            q.eq("uniqueId", follower.uniqueId).eq("status", "STARTED")
+        const video = await ctx.db
+          .query("video")
+          .withIndex("by_uniqueId_and_video", (q) =>
+            q.eq("uniqueId", follower.uniqueId).eq("video", undefined)
           )
           .order("desc")
           .first();
 
-        return { ...follower, log, recording: container ? true : false };
+        return { ...follower, log, recording: video ? true : false };
       })
     );
 

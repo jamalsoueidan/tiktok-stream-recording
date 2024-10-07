@@ -120,23 +120,21 @@ async function getStreamData(roomId: string): Promise<Stream[] | null> {
 }
 
 export async function getTikTokStreams(channel: string): Promise<Stream[]> {
-  await sendUpdate(channel, "Container Instance started");
-
   const roomId = await getRoomId(channel);
   if (!roomId) {
-    await sendUpdate(channel, "Could not find room ID");
+    await sendUpdate("Could not find room ID");
     return [];
   }
 
-  await sendUpdate(channel, "RoomId found for");
+  await sendUpdate("RoomId found");
 
   const liveRoomDetails = await getLiveRoomDetails(roomId);
   if (!liveRoomDetails) {
-    await sendUpdate(channel, "Could not find liveRoom details");
+    await sendUpdate("Could not find liveRoom details");
     return [];
   }
 
-  await sendUpdate(channel, `Live stream details found for`);
+  await sendUpdate("Live stream details found");
 
   const streams = await getStreamData(roomId);
   return streams || [];

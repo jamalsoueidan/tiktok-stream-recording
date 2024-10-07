@@ -3,6 +3,8 @@ import { v } from "convex/values";
 
 export const Video = Table("videos", {
   uniqueId: v.string(),
-  video: v.string(),
-  thumbnail: v.id("_storage"),
+  filename: v.string(),
+  image: v.optional(v.id("_storage")),
+  video: v.optional(v.string()),
+  quality: v.optional(v.string()),
 });
