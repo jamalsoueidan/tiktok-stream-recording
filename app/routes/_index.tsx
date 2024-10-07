@@ -25,8 +25,11 @@ dayjs.extend(relativeTime);
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "Mantine Remix App" },
-    { name: "description", content: "Welcome to Mantine!" },
+    { title: "Tiktok Record Stream" },
+    {
+      name: "description",
+      content: "Automate the process of recording live TikTok streams!",
+    },
   ];
 };
 
