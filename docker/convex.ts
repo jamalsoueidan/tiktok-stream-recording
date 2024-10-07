@@ -35,7 +35,10 @@ export const sendImage = async (imagePath: string) => {
   }
 };
 
-export const sendVideo = async (videoPath: string, quality: string) => {
+export const sendVideo = async (
+  videoPath: string,
+  metadata: { duration: number; quality: string; fileSizeMB: string }
+) => {
   if (!process.env.POST_VIDEO_URL) {
     console.log("POST_VIDEO_URL is not defined");
     return;
@@ -59,7 +62,7 @@ export const sendVideo = async (videoPath: string, quality: string) => {
     body: JSON.stringify({
       uniqueId: process.env.TIKTOK_CHANNEL,
       video: videoPath,
-      quality,
+      metadata,
       filename: process.env.FILENAME,
     }),
   });

@@ -18,8 +18,10 @@ import {
   json,
   useLoaderData,
 } from "@remix-run/react";
+
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { useState } from "react";
+import { FaHome, FaRecordVinyl, FaVideo } from "react-icons/fa";
 import { FollowerForm } from "./components/FollowerForm";
 
 export async function loader() {
@@ -46,11 +48,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <ConvexProvider client={convex}>
             <Container fluid p="md">
               <Flex flex="1" gap="xs" w="100%" mb="md">
+                <Button
+                  component={Link}
+                  to="/"
+                  color="blue"
+                  size="xl"
+                  leftSection={<FaHome />}
+                >
+                  Home
+                </Button>
                 <FollowerForm />
-                <Button component={Link} to="/videos" color="green" size="xl">
+                <Button
+                  component={Link}
+                  to="/videos"
+                  color="green"
+                  size="xl"
+                  leftSection={<FaVideo />}
+                >
                   Videos
                 </Button>
-                <Button component={Link} to="/monitor" color="yellow" size="xl">
+                <Button
+                  component={Link}
+                  to="/monitor"
+                  color="yellow"
+                  size="xl"
+                  leftSection={<FaRecordVinyl />}
+                >
                   Monitor
                 </Button>
               </Flex>

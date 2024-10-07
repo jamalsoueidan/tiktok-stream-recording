@@ -1,60 +1,81 @@
 import {
+  Box,
   Button,
   Card,
-  Container,
   Flex,
   Grid,
   Image,
   Modal,
+  rem,
   Stack,
+  Text,
+  ThemeIcon,
   Title,
-  UnstyledButton,
 } from "@mantine/core";
 import { Link, Outlet, useNavigate, useOutlet } from "@remix-run/react";
 
 import { api } from "convex/_generated/api";
 import { usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import { FaVideo } from "react-icons/fa";
+import { formatDuration } from "~/lib/formatDuration";
 
-dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 export default function Index() {
   const inOulet = !!useOutlet();
   const navigate = useNavigate();
 
   const { results, status, loadMore } = usePaginatedQuery(
-    api.video.paginateAll,
+    api.video.paginateVideos,
     {},
     { initialNumItems: 30 }
   );
 
   return (
-    <Container size="md" py="xl">
+    <>
       <Stack>
-        <Flex justify="center">
-          <Button component={Link} to="/">
-            Back
-          </Button>
-        </Flex>
-
         <Grid>
           {results?.map((video) => (
-            <Grid.Col span={{ base: 12, sm: 3 }} key={video._id}>
-              <Card withBorder shadow="md" p="xs">
-                <UnstyledButton component={Link} to={`/videos/${video._id}`}>
-                  <Image radius="md" src={video.thumbnail_url} />
+            <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
+              <Card
+                withBorder
+                shadow="md"
+                p="xs"
+                component={Link}
+                to={`/videos/${video._id}`}
+              >
+                <Box pos="relative">
+                  <Image
+                    src={video.image}
+                    radius="md"
+                    w="100%"
+                    mah={rem(250)}
+                    fit="contain"
+                  />
+                  <ThemeIcon
+                    size={rem(90)}
+                    color="transparent"
+                    pos="absolute"
+                    top="50%"
+                    left="50%"
+                    style={{ transform: "translate(-50%, -50%)", opacity: 0.5 }}
+                  >
+                    <FaVideo style={{ width: "80%", height: "80%" }} />
+                  </ThemeIcon>
+                </Box>
+
+                <Flex justify="space-between" align="center">
                   <Title order={3}>{video.uniqueId}</Title>
-                </UnstyledButton>
-                <Button
-                  component={Link}
-                  to={`https://www.tiktok.com/@${video.uniqueId}`}
-                  target="_blank"
-                  color="black"
-                  size="compact-xs"
-                >
-                  See Tiktok
-                </Button>
+                  {video.durationSec ? (
+                    <Text fz="sm">{formatDuration(video.durationSec)}</Text>
+                  ) : null}
+                </Flex>
+
+                <Text c="dimmed" fz="sm">
+                  {dayjs(video._creationTime).format(`LLL`)}
+                </Text>
               </Card>
             </Grid.Col>
           ))}
@@ -63,9 +84,10 @@ export default function Index() {
           <Button onClick={() => loadMore(10)}>Load More</Button>
         ) : null}
       </Stack>
+
       <Modal opened={inOulet} onClose={() => navigate(-1)} size="xl">
         <Outlet />
       </Modal>
-    </Container>
+    </>
   );
 }

@@ -4,11 +4,13 @@ import {
   Badge,
   Button,
   Card,
-  Container,
   Divider,
   Flex,
+  Grid,
+  Group,
   Image,
   Modal,
+  Paper,
   Stack,
   Text,
   Title,
@@ -51,36 +53,61 @@ export default function Index() {
   const log = follower?.log;
 
   return (
-    <Container size="md" py="xl">
+    <>
       <Stack>
-        <Flex justify="center">
-          <Button component={Link} to="/">
-            Back
-          </Button>
-          {follower?.requireLogin ? (
+        {follower?.requireLogin ? (
+          <Flex justify="center">
             <Text>
               This user requires login to view their stream. Please login to
               view their stream.
             </Text>
-          ) : null}
-        </Flex>
+          </Flex>
+        ) : null}
+
         {follower ? (
           <Card>
             <Flex align="center" justify="space-between">
-              <Flex align="center" gap="sm">
+              <Group>
                 <Avatar src={follower.avatarMedium} size="lg" />
-                <Title order={2}>{follower.uniqueId}</Title>
-                {follower.log?.live === true ? (
-                  <Badge color="green">Live</Badge>
-                ) : (
-                  <Badge color="red">Offline</Badge>
-                )}
+                <div>
+                  <Flex align="center" gap="sm">
+                    <Title order={2}>{follower.uniqueId}</Title>
+                    {follower.log?.live === true ? (
+                      <Badge color="green">Live</Badge>
+                    ) : (
+                      <Badge color="red">Offline</Badge>
+                    )}
+                  </Flex>
+                  <Text>
+                    {log?._creationTime
+                      ? dayjs().from(dayjs(log?._creationTime), true) + " ago"
+                      : null}
+                  </Text>
+                </div>
+              </Group>
+              <Flex justify="flex-end" gap="md">
+                {log?.live && log.roomId ? (
+                  <Button
+                    component={Link}
+                    to={`/tiktok/${follower.uniqueId}/stream/${log.roomId}`}
+                  >
+                    Watch stream
+                  </Button>
+                ) : null}
+                <Button
+                  onClick={() => {
+                    setLoading(true);
+                    checkUser({
+                      uniqueId: follower.uniqueId,
+                    }).then(() => {
+                      setLoading(false);
+                    });
+                  }}
+                  loading={loading}
+                >
+                  Update
+                </Button>
               </Flex>
-              <Text>
-                {log?._creationTime
-                  ? dayjs().from(dayjs(log?._creationTime), true) + " ago"
-                  : null}
-              </Text>
             </Flex>
             <Card.Section my="md">
               <Divider />
@@ -94,51 +121,27 @@ export default function Index() {
               dataKey={{ x: "hour", y: "index", z: "value" }}
               color="blue"
             />
-            <Card.Section my="md">
-              <Divider />
-            </Card.Section>
-            <Flex justify="flex-end" gap="md">
-              {log?.live && log.roomId ? (
-                <Button
-                  component={Link}
-                  to={`/tiktok/${follower.uniqueId}/stream/${log.roomId}`}
-                >
-                  Watch stream
-                </Button>
-              ) : null}
-              <Button
-                onClick={() => {
-                  setLoading(true);
-                  checkUser({
-                    uniqueId: follower.uniqueId,
-                  }).then(() => {
-                    setLoading(false);
-                  });
-                }}
-                loading={loading}
-              >
-                Update
-              </Button>
-            </Flex>
           </Card>
         ) : null}
-        <Flex>
+        <Grid gutter="xs">
           {results?.map((video) => (
-            <Card
-              key={video._id}
-              component={Link}
-              to={`/tiktok/${video.uniqueId}/watch/${video._id}`}
-            >
-              <Image
-                radius="md"
-                mah={200}
-                w="auto"
-                fit="contain"
-                src={video.thumbnail_url}
-              />
-            </Card>
+            <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
+              <Paper
+                key={video._id}
+                component={Link}
+                to={`/tiktok/${video.uniqueId}/watch/${video._id}`}
+              >
+                <Image
+                  radius="md"
+                  h="auto"
+                  w="100%"
+                  fit="contain"
+                  src={video.image}
+                />
+              </Paper>
+            </Grid.Col>
           ))}
-        </Flex>
+        </Grid>
         {status === "CanLoadMore" ? (
           <Button onClick={() => loadMore(10)}>Load More</Button>
         ) : null}
@@ -146,6 +149,6 @@ export default function Index() {
       <Modal opened={inOulet} onClose={() => navigate(-1)} size="xl">
         <Outlet />
       </Modal>
-    </Container>
+    </>
   );
 }

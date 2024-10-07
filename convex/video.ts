@@ -14,19 +14,44 @@ export const get = internalQuery({
   },
 });
 
-export const paginateAll = query({
+export const paginateRecording = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
       .query("video")
+      .withIndex("by_video", (q) => q.eq("video", undefined))
       .order("desc")
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
       paginate.page.map(async (video) => {
         if (video.image) {
-          const thumbnail_url = await ctx.storage.getUrl(video.image);
-          return { ...video, thumbnail_url };
+          return { ...video, image: await ctx.storage.getUrl(video.image) };
+        }
+        return video;
+      })
+    );
+
+    return {
+      ...paginate,
+      page,
+    };
+  },
+});
+
+export const paginateVideos = query({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const paginate = await ctx.db
+      .query("video")
+      .filter((q) => q.neq(q.field("video"), undefined))
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    const page = await Promise.all(
+      paginate.page.map(async (video) => {
+        if (video.image) {
+          return { ...video, image: await ctx.storage.getUrl(video.image) };
         }
         return video;
       })
@@ -54,8 +79,7 @@ export const paginate = query({
     const page = await Promise.all(
       paginate.page.map(async (video) => {
         if (video.image) {
-          const thumbnail_url = await ctx.storage.getUrl(video.image);
-          return { ...video, thumbnail_url };
+          return { ...video, image: await ctx.storage.getUrl(video.image) };
         }
         return video;
       })

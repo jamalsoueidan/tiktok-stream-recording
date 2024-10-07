@@ -42,18 +42,29 @@ export const saveImage = httpAction(async (ctx, request) => {
 });
 
 export const saveVideo = httpAction(async (ctx, request) => {
-  const { uniqueId, filename, quality, video } = await request.json();
+  const { uniqueId, filename, metadata, video } = await request.json();
 
   const doc = await ctx.runQuery(internal.video.getByFilename, { filename });
   if (!doc) {
     throw new Error("Not found video reference");
   }
 
+  console.log({
+    id: doc?._id,
+    uniqueId,
+    video,
+    quality: metadata.quality,
+    duration: metadata.duration,
+    fileSizeMB: metadata.fileSizeMB,
+  });
+
   await ctx.runMutation(internal.video.update, {
     id: doc?._id,
     uniqueId,
     video,
-    quality,
+    quality: metadata.quality,
+    durationSec: metadata.duration,
+    fileSizeMB: metadata.fileSizeMB,
   });
 
   //terminate container after 10min

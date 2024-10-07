@@ -31,22 +31,19 @@ export const captureVideoFromStream = async (
   videoQuality: string
 ) => {
   await sendUpdate("Capture Video...");
+
   const ffmpegCommand = ffmpeg(streamUrl)
     .output(videoOutput)
     .videoCodec("copy")
     .audioCodec("copy")
     .outputOptions("-movflags", "faststart");
+
   if (process.env.FFMPEG_DURATION) {
     ffmpegCommand.duration(process.env.FFMPEG_DURATION);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let intervalId: any;
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins} minute(s) and ${secs} second(s)`;
-  };
 
   ffmpegCommand
     .on("start", async () => {
@@ -65,9 +62,40 @@ export const captureVideoFromStream = async (
 
       await uploadToBlobStorage(videoOutput, videoOutput, "video/mp4");
 
-      await sendVideo(videoOutput, videoQuality);
-
-      await sendUpdate("Finished streaming");
+      getVideoMetadata(videoOutput, videoQuality);
     })
     .run();
+};
+
+const getVideoMetadata = (videoOutput: string, quality: string) => {
+  ffmpeg.ffprobe(videoOutput, async (err, metadata) => {
+    if (err) {
+      console.error("Error retrieving video metadata:", err);
+      return;
+    }
+
+    const duration = metadata.format.duration; // Duration in seconds
+    const fileSize = metadata.format.size; // File size in bytes
+
+    if (!fileSize || !duration) {
+      console.log("filesize or duration is null");
+      return;
+    }
+    // Convert file size to MB
+    const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+
+    await sendUpdate(`Finished streaming, duration ${formatTime(duration)}`);
+
+    await sendVideo(videoOutput, {
+      duration: Math.floor(duration),
+      fileSizeMB,
+      quality,
+    });
+  });
+};
+
+const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins} minute(s) and ${secs} second(s)`;
 };

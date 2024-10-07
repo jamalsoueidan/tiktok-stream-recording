@@ -7,4 +7,6 @@ export const Video = Table("videos", {
   image: v.optional(v.id("_storage")),
   video: v.optional(v.string()),
   quality: v.optional(v.string()),
+  fileSizeMB: v.optional(v.string()),
+  durationSec: v.optional(v.number()),
 });

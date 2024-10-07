@@ -12,9 +12,9 @@ export default defineSchema({
   video: Video.table
     .index("by_uniqueId", ["uniqueId"])
     .index("by_filename", ["filename"])
+    .index("by_video", ["video"])
     .index("by_uniqueId_and_video", ["uniqueId", "video"]),
-  container_log: ContainerLog.table.index("by_uniqueId_and_filename", [
-    "uniqueId",
-    "filename",
-  ]),
+  container_log: ContainerLog.table
+    .index("by_uniqueId_and_filename", ["uniqueId", "filename"])
+    .index("by_filename", ["filename"]),
 });
