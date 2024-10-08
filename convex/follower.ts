@@ -31,7 +31,7 @@ export const follow = action({
 
 export const unfollow = mutation({
   args: {
-    id: v.id("follower"),
+    id: v.id("followers"),
   },
   handler: (ctx, args) => ctx.db.delete(args.id),
 });
@@ -39,7 +39,7 @@ export const unfollow = mutation({
 export const insert = internalMutation({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: (ctx, args) =>
-    ctx.db.insert("follower", {
+    ctx.db.insert("followers", {
       cronRunAt: 0,
       uniqueId: args.uniqueId,
     }),
@@ -49,20 +49,20 @@ export const paginate = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("follower")
+      .query("followers")
       .order("desc")
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
       paginate.page.map(async (follower) => {
         const log = await ctx.db
-          .query("log")
+          .query("logs")
           .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
           .order("desc")
           .first();
 
         const video = await ctx.db
-          .query("video")
+          .query("videos")
           .withIndex("by_uniqueId_and_video", (q) =>
             q.eq("uniqueId", follower.uniqueId).eq("video", undefined)
           )
@@ -84,7 +84,7 @@ export const getByUniqueId = internalQuery({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) =>
     ctx.db
-      .query("follower")
+      .query("followers")
       .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
       .unique(),
 });
@@ -93,7 +93,7 @@ export const get = query({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     const follower = await ctx.db
-      .query("follower")
+      .query("followers")
       .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
       .first();
 
@@ -102,7 +102,7 @@ export const get = query({
     }
 
     const log = await ctx.db
-      .query("log")
+      .query("logs")
       .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
       .order("desc")
       .first();
@@ -117,14 +117,14 @@ export const get = query({
 export const getAllNotUpdated = internalQuery({
   handler: async (ctx) =>
     ctx.db
-      .query("follower")
+      .query("followers")
       .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 15 * 60000)) // 60000 stands for one minute in milliseconds
       .take(15),
 });
 
 export const update = internalMutation({
   args: {
-    id: v.id("follower"),
+    id: v.id("followers"),
     ...partial(
       pick(Follower.withoutSystemFields, [
         "cronRunAt",

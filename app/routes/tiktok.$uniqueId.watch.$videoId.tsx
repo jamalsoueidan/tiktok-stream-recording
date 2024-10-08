@@ -12,7 +12,7 @@ export default function Stream() {
   const video = useAction(api.azure.generateURL);
 
   useEffect(() => {
-    video({ id: params.videoId as Id<"video"> }).then(setUrl);
+    video({ id: params.videoId as Id<"videos"> }).then(setUrl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

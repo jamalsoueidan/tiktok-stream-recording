@@ -7,7 +7,7 @@ import { Video } from "./tables/video";
 
 export const get = internalQuery({
   args: {
-    id: v.id("video"),
+    id: v.id("videos"),
   },
   handler: async (ctx, args) => {
     return ctx.db.get(args.id);
@@ -19,7 +19,7 @@ export const countRecording = query({
   handler: async (ctx) => {
     return (
       await ctx.db
-        .query("video")
+        .query("videos")
         .withIndex("by_video", (q) => q.eq("video", undefined))
         .collect()
     ).length;
@@ -30,7 +30,7 @@ export const paginateRecording = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("video")
+      .query("videos")
       .withIndex("by_video", (q) => q.eq("video", undefined))
       .order("desc")
       .paginate(args.paginationOpts);
@@ -55,7 +55,7 @@ export const paginateVideos = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("video")
+      .query("videos")
       .filter((q) => q.neq(q.field("video"), undefined))
       .order("desc")
       .paginate(args.paginationOpts);
@@ -83,7 +83,7 @@ export const paginate = query({
   },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("video")
+      .query("videos")
       .filter((q) => q.eq(q.field("uniqueId"), args.uniqueId))
       .order("desc")
       .paginate(args.paginationOpts);
@@ -109,7 +109,7 @@ export const insert = internalMutation({
     ...Video.withoutSystemFields,
   },
   handler: async (ctx, args) => {
-    return ctx.db.insert("video", args);
+    return ctx.db.insert("videos", args);
   },
 });
 
@@ -117,7 +117,7 @@ export const getByFilename = internalQuery({
   args: pick(Video.withoutSystemFields, ["filename"]),
   handler: async (ctx, args) => {
     return ctx.db
-      .query("video")
+      .query("videos")
       .withIndex("by_filename", (q) => q.eq("filename", args.filename))
       .first();
   },
@@ -125,7 +125,7 @@ export const getByFilename = internalQuery({
 
 export const update = internalMutation({
   args: {
-    id: v.id("video"),
+    id: v.id("videos"),
     ...partial(Video.withoutSystemFields),
   },
   handler: async (convexToJson, args) => {

@@ -184,7 +184,7 @@ export const getContainerStatus = action({
 // Function to generate a SAS URL
 export const generateURL = action({
   args: {
-    id: v.id("video"),
+    id: v.id("videos"),
   },
   handler: async (ctx, args) => {
     const video = await ctx.runQuery(internal.video.get, { id: args.id });

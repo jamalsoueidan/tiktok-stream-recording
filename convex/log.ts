@@ -8,7 +8,7 @@ import { Log } from "./tables/log";
 export const save = internalMutation({
   args: pick(Log.withoutSystemFields, ["uniqueId", "roomId"]),
   handler: (ctx, args) => {
-    return ctx.db.insert("log", {
+    return ctx.db.insert("logs", {
       ...args,
       live: false,
     });
@@ -17,7 +17,7 @@ export const save = internalMutation({
 
 export const update = internalMutation({
   args: {
-    id: v.id("log"),
+    id: v.id("logs"),
     ...partial(Log.withoutSystemFields),
   },
   handler: (ctx, args) => {
@@ -30,7 +30,7 @@ export const getLatest = internalQuery({
   args: pick(Log.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     return ctx.db
-      .query("log")
+      .query("logs")
       .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
       .order("desc")
       .first();
@@ -41,7 +41,7 @@ export const stats = query({
   args: pick(Log.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     const logs = await ctx.db
-      .query("log")
+      .query("logs")
       .withIndex("by_uniqueId_and_live", (q) =>
         q.eq("uniqueId", args.uniqueId).eq("live", true)
       )
