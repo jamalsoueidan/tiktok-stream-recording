@@ -62,16 +62,11 @@ export const paginateRecording = queryWithUser({
 export const paginateVideos = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const tiktokUsers = await ctx.db
-      .query("tiktokUsers")
-      .filter((q) => q.neq("video", undefined))
-      .withIndex("by_user", (q) => q.eq("user", ctx.user))
-      .collect();
-
-    const uniqueIds = tiktokUsers.map((tu) => tu.uniqueId);
+    const uniqueIds: string[] = await ctx.runQuery(api.tiktokUsers.uniqueIds);
 
     const paginate = await ctx.db
       .query("videos")
+      .filter((q) => q.neq("video", undefined))
       .order("desc")
       .paginate(args.paginationOpts);
 
