@@ -2,7 +2,8 @@ import { pick } from "convex-helpers";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { internalMutation, internalQuery, query } from "./_generated/server";
+import { api } from "./_generated/api";
+import { internalMutation, internalQuery } from "./_generated/server";
 import { queryWithUser } from "./auth";
 import { Video } from "./tables/video";
 
@@ -15,21 +16,25 @@ export const get = internalQuery({
   },
 });
 
-export const countRecording = query({
+export const countRecording = queryWithUser({
   args: {},
   handler: async (ctx) => {
-    return (
-      await ctx.db
-        .query("videos")
-        .withIndex("by_video", (q) => q.eq("video", undefined))
-        .collect()
-    ).length;
+    const uniqueIds: string[] = await ctx.runQuery(api.tiktokUsers.uniqueIds);
+    const recordings = await ctx.db
+      .query("videos")
+      .withIndex("by_video", (q) => q.eq("video", undefined))
+      .collect();
+
+    return recordings.filter((video) => uniqueIds.includes(video.uniqueId))
+      .length;
   },
 });
 
-export const paginateRecording = query({
+export const paginateRecording = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
+    const uniqueIds: string[] = await ctx.runQuery(api.tiktokUsers.uniqueIds);
+
     const paginate = await ctx.db
       .query("videos")
       .withIndex("by_video", (q) => q.eq("video", undefined))
@@ -37,12 +42,14 @@ export const paginateRecording = query({
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
-      paginate.page.map(async (video) => {
-        if (video.image) {
-          return { ...video, image: await ctx.storage.getUrl(video.image) };
-        }
-        return video;
-      })
+      paginate.page
+        .filter((video) => uniqueIds.includes(video.uniqueId))
+        .map(async (video) => {
+          if (video.image) {
+            return { ...video, image: await ctx.storage.getUrl(video.image) };
+          }
+          return video;
+        })
     );
 
     return {
@@ -55,18 +62,27 @@ export const paginateRecording = query({
 export const paginateVideos = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
+    const tiktokUsers = await ctx.db
+      .query("tiktokUsers")
+      .withIndex("by_user", (q) => q.eq("user", ctx.user))
+      .collect();
+
+    const uniqueIds = tiktokUsers.map((tu) => tu.uniqueId);
+
     const paginate = await ctx.db
       .query("videos")
       .order("desc")
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
-      paginate.page.map(async (video) => {
-        if (video.image) {
-          return { ...video, image: await ctx.storage.getUrl(video.image) };
-        }
-        return video;
-      })
+      paginate.page
+        .filter((video) => uniqueIds.includes(video.uniqueId))
+        .map(async (video) => {
+          if (video.image) {
+            return { ...video, image: await ctx.storage.getUrl(video.image) };
+          }
+          return video;
+        })
     );
 
     return {
@@ -88,6 +104,7 @@ export const paginate = queryWithUser({
         q.eq("user", ctx.user).eq("uniqueId", args.uniqueId)
       )
       .unique();
+
     if (!isFollowing) {
       throw new Error("not access");
     }
