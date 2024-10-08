@@ -15,6 +15,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as auth from "../auth.js";
 import type * as azure from "../azure.js";
 import type * as containerLog from "../containerLog.js";
 import type * as crons from "../crons.js";
@@ -38,6 +39,7 @@ import type * as video from "../video.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   azure: typeof azure;
   containerLog: typeof containerLog;
   crons: typeof crons;

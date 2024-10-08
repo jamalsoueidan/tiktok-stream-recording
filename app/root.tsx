@@ -1,6 +1,7 @@
 import "@mantine/charts/styles.css";
 import "@mantine/core/styles.css";
 
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import {
   Button,
   ColorSchemeScript,
@@ -18,12 +19,17 @@ import {
   json,
   useLoaderData,
 } from "@remix-run/react";
-
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import {
+  Authenticated,
+  ConvexReactClient,
+  Unauthenticated,
+} from "convex/react";
 import { useState } from "react";
 import { FaHome, FaVideo } from "react-icons/fa";
 import { FollowerForm } from "./components/FollowerForm";
 import { MonitorButton } from "./components/MonitorButton";
+import { SignIn } from "./components/SignIn";
+import { SignOutButton } from "./components/Signout";
 
 export async function loader() {
   const CONVEX_URL = process.env["CONVEX_URL"]!;
@@ -46,33 +52,39 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <MantineProvider>
-          <ConvexProvider client={convex}>
-            <Container fluid p="md">
-              <Flex flex="1" gap="xs" w="100%" mb="md">
-                <Button
-                  component={Link}
-                  to="/"
-                  color="blue"
-                  size="xl"
-                  leftSection={<FaHome />}
-                >
-                  Home
-                </Button>
-                <FollowerForm />
-                <Button
-                  component={Link}
-                  to="/videos"
-                  color="green"
-                  size="xl"
-                  leftSection={<FaVideo />}
-                >
-                  Videos
-                </Button>
-                <MonitorButton />
-              </Flex>
-              {children}
-            </Container>
-          </ConvexProvider>
+          <ConvexAuthProvider client={convex}>
+            <Authenticated>
+              <Container fluid p="md">
+                <Flex flex="1" gap="xs" w="100%" mb="md">
+                  <Button
+                    component={Link}
+                    to="/"
+                    color="blue"
+                    size="lg"
+                    leftSection={<FaHome />}
+                  >
+                    Home
+                  </Button>
+                  <FollowerForm />
+                  <Button
+                    component={Link}
+                    to="/videos"
+                    color="green"
+                    size="lg"
+                    leftSection={<FaVideo />}
+                  >
+                    Videos
+                  </Button>
+                  <MonitorButton />
+                  <SignOutButton />
+                </Flex>
+                {children}
+              </Container>
+            </Authenticated>
+            <Unauthenticated>
+              <SignIn />
+            </Unauthenticated>
+          </ConvexAuthProvider>
         </MantineProvider>
         <ScrollRestoration />
         <Scripts />

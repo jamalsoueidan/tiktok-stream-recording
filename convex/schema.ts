@@ -1,3 +1,4 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema } from "convex/server";
 import { ContainerLog } from "./tables/container_log";
 import { Follower } from "./tables/follower";
@@ -5,6 +6,7 @@ import { Log } from "./tables/log";
 import { Video } from "./tables/video";
 
 export default defineSchema({
+  ...authTables,
   log: Log.table
     .index("by_uniqueId", ["uniqueId"])
     .index("by_uniqueId_and_live", ["uniqueId", "live"]),

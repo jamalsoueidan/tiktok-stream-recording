@@ -12,12 +12,12 @@ export const FollowerForm = () => {
       <TextInput
         placeholder="Add follower"
         value={uniqueId}
-        size="xl"
+        size="lg"
         onChange={(event) => setUniqueId(event.currentTarget.value)}
         flex="1"
       />
       <Button
-        size="xl"
+        size="lg"
         onClick={() => {
           addFollower({ uniqueId }).then(() => {
             setUniqueId("");

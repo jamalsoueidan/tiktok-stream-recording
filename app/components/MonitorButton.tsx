@@ -13,7 +13,7 @@ export const MonitorButton = () => {
         component={Link}
         to="/monitor"
         color="yellow"
-        size="xl"
+        size="lg"
         leftSection={<FaRecordVinyl />}
       >
         Monitor
