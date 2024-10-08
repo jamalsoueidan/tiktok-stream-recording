@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -64,13 +65,15 @@ export default function Index() {
                   >
                     <FaVideo style={{ width: "80%", height: "80%" }} />
                   </ThemeIcon>
+                  {video.durationSec ? (
+                    <Badge pos="absolute" bottom="0" right="0" color="black">
+                      <Text fz="sm">{formatDuration(video.durationSec)}</Text>
+                    </Badge>
+                  ) : null}
                 </Box>
 
-                <Flex justify="space-between" align="center">
-                  <Title order={3}>{video.uniqueId}</Title>
-                  {video.durationSec ? (
-                    <Text fz="sm">{formatDuration(video.durationSec)}</Text>
-                  ) : null}
+                <Flex justify="space-between" align="center" mt={rem(4)}>
+                  <Title fz="lg">{video.uniqueId}</Title>
                 </Flex>
 
                 <Text c="dimmed" fz="sm">

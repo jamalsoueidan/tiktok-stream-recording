@@ -21,8 +21,9 @@ import {
 
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { useState } from "react";
-import { FaHome, FaRecordVinyl, FaVideo } from "react-icons/fa";
+import { FaHome, FaVideo } from "react-icons/fa";
 import { FollowerForm } from "./components/FollowerForm";
+import { MonitorButton } from "./components/MonitorButton";
 
 export async function loader() {
   const CONVEX_URL = process.env["CONVEX_URL"]!;
@@ -67,15 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 >
                   Videos
                 </Button>
-                <Button
-                  component={Link}
-                  to="/monitor"
-                  color="yellow"
-                  size="xl"
-                  leftSection={<FaRecordVinyl />}
-                >
-                  Monitor
-                </Button>
+                <MonitorButton />
               </Flex>
               {children}
             </Container>

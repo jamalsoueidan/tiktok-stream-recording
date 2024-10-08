@@ -11,9 +11,11 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@auth/core": "^0.36.0",
     "@azure/arm-containerinstance": "^9.1.0",
     "@azure/identity": "^4.4.1",
     "@azure/storage-blob": "^12.25.0",
+    "@convex-dev/auth": "^0.0.71",
     "@mantine/charts": "^7.13.1",
     "@mantine/core": "^7.13.1",
     "@mantine/hooks": "^7.13.1",

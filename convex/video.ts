@@ -14,6 +14,18 @@ export const get = internalQuery({
   },
 });
 
+export const countRecording = query({
+  args: {},
+  handler: async (ctx) => {
+    return (
+      await ctx.db
+        .query("video")
+        .withIndex("by_video", (q) => q.eq("video", undefined))
+        .collect()
+    ).length;
+  },
+});
+
 export const paginateRecording = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
