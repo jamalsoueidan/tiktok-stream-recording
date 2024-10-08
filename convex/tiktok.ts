@@ -30,7 +30,7 @@ export interface Stream {
   url: string;
   vbitrate: number;
 }
-
+const URL_WEB_LIVE = "https://www.tiktok.com/@{channel}/live";
 const URL_API_LIVE_DETAIL =
   "https://www.tiktok.com/api/live/detail/?aid=1988&roomID={room_id}";
 const URL_WEBCAST_ROOM_INFO =
@@ -109,7 +109,7 @@ export const checkAll = internalAction({
     console.log(`${users.length} users to check is streaming live`);
 
     for (const [index, user] of users.entries()) {
-      await ctx.scheduler.runAfter(ms(`${index * 3}s`), api.tiktok.checkUser, {
+      await ctx.scheduler.runAfter(ms(`${index * 15}s`), api.tiktok.checkUser, {
         uniqueId: user.uniqueId,
       });
     }
@@ -138,7 +138,7 @@ export const checkUser = action({
       cronRunAt: Date.now(),
     });
 
-    const http = await ctx.runAction(internal.tiktok.getRoomId, {
+    const roomId = await ctx.runAction(internal.tiktok.getRoomId, {
       uniqueId: args.uniqueId,
     });
 
@@ -146,7 +146,6 @@ export const checkUser = action({
       uniqueId: args.uniqueId,
     });
 
-    const roomId = http.LiveRoom?.liveRoomUserInfo?.user?.roomId;
     //user is private or we dont have info about him
     if (!roomId) {
       await ctx.runMutation(internal.follower.update, {
@@ -187,12 +186,56 @@ export const checkUser = action({
     await ctx.runMutation(internal.follower.update, {
       id: followerId,
       cronRunAt: Date.now(),
-      avatarMedium: http.LiveRoom?.liveRoomUserInfo?.user?.avatarMedium,
-      avatarLarger: http.LiveRoom?.liveRoomUserInfo?.user?.avatarLarger,
-      signature: http.LiveRoom?.liveRoomUserInfo?.user?.signature,
-      nickname: http.LiveRoom?.liveRoomUserInfo?.user?.nickname,
       requireLogin,
     });
+  },
+});
+
+export const getTiktokMetadata = action({
+  args: {
+    uniqueId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const liveUrl = URL_WEB_LIVE.replace("{channel}", args.uniqueId);
+    const response = await fetch(liveUrl, { redirect: "manual" });
+    const textData = await response.text();
+
+    const scriptRegex =
+      /<script id="SIGI_STATE" type="application\/json">(.+?)<\/script>/;
+    const match = textData.match(scriptRegex);
+    if (match && match[1]) {
+      const metadata = JSON.parse(match[1]) as {
+        LiveRoom?: {
+          liveRoomUserInfo?: {
+            stats: {
+              followerCount: number;
+              followingCount: number;
+            };
+            user?: {
+              avatarLarger: string;
+              roomId: string;
+              avatarMedium: string;
+              signature: string;
+              nickname: string;
+            };
+          };
+        };
+      };
+
+      const follower = await ctx.runQuery(internal.follower.getByUniqueId, {
+        uniqueId: args.uniqueId,
+      });
+
+      if (follower) {
+        await ctx.runMutation(internal.follower.update, {
+          id: follower._id,
+          avatarMedium: metadata.LiveRoom?.liveRoomUserInfo?.user?.avatarMedium,
+          avatarLarger: metadata.LiveRoom?.liveRoomUserInfo?.user?.avatarLarger,
+          signature: metadata.LiveRoom?.liveRoomUserInfo?.user?.signature,
+          nickname: metadata.LiveRoom?.liveRoomUserInfo?.user?.nickname,
+        });
+      }
+    }
   },
 });
 
@@ -201,57 +244,27 @@ export const getRoomId = internalAction({
     uniqueId: v.string(),
   },
   handler: async (ctx, args) => {
-    const response = await fetch("https://api.wintr.com/fetch", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        apikey: process.env.WINTR_KEY,
-        method: "GET",
-        url: `https://www.tiktok.com/@${args.uniqueId}/live`,
-        outputschema: {
-          scripts: {
-            group: "script",
-            data: {
-              script_content: {
-                selector: "script#SIGI_STATE",
-                attr: "*html*",
-              },
-            },
-          },
-        },
-      }),
-    });
+    try {
+      const liveUrl = URL_WEB_LIVE.replace("{channel}", args.uniqueId);
+      const response = await fetch(liveUrl, { redirect: "manual" });
+      const textData = await response.text();
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // Try to find room_id in the meta tag directly using RegExp
+      const roomIdMetaMatch = textData.match(/room_id=(\d+)/);
+      if (roomIdMetaMatch && roomIdMetaMatch[1]) {
+        return roomIdMetaMatch[1];
+      }
+
+      // Fallback to finding room_id in the SIGI_STATE script using RegExp
+      const sigiStateMatch = textData.match(/"roomId":"(\d+)"/);
+      if (sigiStateMatch && sigiStateMatch[1]) {
+        return sigiStateMatch[1];
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error fetching room ID:", error);
+      return null;
     }
-
-    const json = (await response.json()) as {
-      content: {
-        scripts: Array<{ script_content: string }>;
-      };
-    };
-
-    const script = json.content.scripts.filter((t) => t.script_content);
-
-    return JSON.parse(script[0].script_content) as {
-      LiveRoom?: {
-        liveRoomUserInfo?: {
-          stats: {
-            followerCount: number;
-            followingCount: number;
-          };
-          user?: {
-            avatarLarger: string;
-            roomId: string;
-            avatarMedium: string;
-            signature: string;
-            nickname: string;
-          };
-        };
-      };
-    };
   },
 });

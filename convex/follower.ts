@@ -26,6 +26,7 @@ export const follow = actionWithUser({
       user: ctx.user,
     });
 
+    await ctx.scheduler.runAfter(0, api.tiktok.getTiktokMetadata, args);
     await ctx.scheduler.runAfter(0, api.tiktok.checkUser, args);
   },
 });
