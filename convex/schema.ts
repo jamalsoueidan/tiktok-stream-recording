@@ -2,8 +2,8 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema } from "convex/server";
 import { ContainerLog } from "./tables/_containerLog";
 import { Follower } from "./tables/follower";
-import { FollowersUsers } from "./tables/followsUsers";
 import { Log } from "./tables/log";
+import { TiktokUsers } from "./tables/tiktokUsers";
 import { Video } from "./tables/video";
 
 export default defineSchema({
@@ -20,8 +20,8 @@ export default defineSchema({
   containerLogs: ContainerLog.table
     .index("by_uniqueId_and_filename", ["uniqueId", "filename"])
     .index("by_filename", ["filename"]),
-  followersUsers: FollowersUsers.table
-    .index("user", ["user"])
-    .index("follower_user", ["follower", "user"])
-    .index("follower", ["follower"]),
+  tiktokUsers: TiktokUsers.table
+    .index("by_user", ["user"])
+    .index("by_user_and_uniqueId", ["user", "uniqueId"])
+    .index("by_uniqueId", ["uniqueId"]),
 });

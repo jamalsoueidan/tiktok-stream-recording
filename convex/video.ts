@@ -1,8 +1,10 @@
 import { pick } from "convex-helpers";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { internalMutation, internalQuery, query } from "./_generated/server";
+import { queryWithUser } from "./auth";
 import { Video } from "./tables/video";
 
 export const get = internalQuery({
@@ -51,21 +53,30 @@ export const paginateRecording = query({
   },
 });
 
-export const paginateVideos = query({
+export const paginateVideos = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("videos")
-      .filter((q) => q.neq(q.field("video"), undefined))
+      .query("tiktokUsers")
+      .withIndex("by_user", (q) => q.eq("user", ctx.user))
       .order("desc")
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
-      paginate.page.map(async (video) => {
-        if (video.image) {
-          return { ...video, image: await ctx.storage.getUrl(video.image) };
+      paginate.page.map(async (tiktokUser) => {
+        const video = await getOneFrom(
+          ctx.db,
+          "videos",
+          "by_uniqueId",
+          tiktokUser.uniqueId,
+          "uniqueId"
+        );
+
+        if (!video || !video.image) {
+          return video;
         }
-        return video;
+
+        return { ...video, image: await ctx.storage.getUrl(video.image) };
       })
     );
 
@@ -76,12 +87,22 @@ export const paginateVideos = query({
   },
 });
 
-export const paginate = query({
+export const paginate = queryWithUser({
   args: {
     paginationOpts: paginationOptsValidator,
     ...pick(Video.withoutSystemFields, ["uniqueId"]),
   },
   handler: async (ctx, args) => {
+    const isFollowing = await ctx.db
+      .query("tiktokUsers")
+      .withIndex("by_user_and_uniqueId", (q) =>
+        q.eq("user", ctx.user).eq("uniqueId", args.uniqueId)
+      )
+      .unique();
+    if (!isFollowing) {
+      throw new Error("not access");
+    }
+
     const paginate = await ctx.db
       .query("videos")
       .filter((q) => q.eq(q.field("uniqueId"), args.uniqueId))

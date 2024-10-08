@@ -102,7 +102,7 @@ export default function Index() {
                   size="compact-xs"
                   onClick={() =>
                     unfollow({
-                      id: follower._id,
+                      uniqueId: follower.uniqueId,
                     })
                   }
                 >

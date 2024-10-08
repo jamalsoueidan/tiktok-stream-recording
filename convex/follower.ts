@@ -16,15 +16,13 @@ export const follow = actionWithUser({
     }
 
     const follower = await ctx.runQuery(internal.follower.getByUniqueId, args);
-    let follower_id;
-    if (follower) {
-      follower_id = follower?._id;
-    } else {
-      follower_id = await ctx.runMutation(internal.follower.insert, args);
+
+    if (!follower) {
+      await ctx.runMutation(internal.follower.insert, args);
     }
 
-    await ctx.runMutation(internal.followersUsers.insert, {
-      follower: follower_id,
+    await ctx.runMutation(internal.tiktokUsers.insert, {
+      uniqueId: args.uniqueId,
       user: ctx.user,
     });
 
@@ -33,31 +31,36 @@ export const follow = actionWithUser({
 });
 
 export const unfollow = mutationWithUser({
-  args: {
-    id: v.id("followers"),
-  },
+  args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
-    const followerUser = await ctx.db
-      .query("followersUsers")
-      .withIndex("follower_user", (q) =>
-        q.eq("follower", args.id).eq("user", ctx.user)
+    const tiktokUser = await ctx.db
+      .query("tiktokUsers")
+      .withIndex("by_user_and_uniqueId", (q) =>
+        q.eq("user", ctx.user).eq("uniqueId", args.uniqueId)
       )
       .unique();
-    if (!followerUser) {
+    if (!tiktokUser) {
       throw new Error("Follower not found");
     }
 
-    await ctx.db.delete(followerUser._id);
+    await ctx.db.delete(tiktokUser._id);
 
-    const otherFollowers = await ctx.db
-      .query("followersUsers")
-      .withIndex("follower", (q) => q.eq("follower", args.id))
+    const otherFollowing = await ctx.db
+      .query("tiktokUsers")
+      .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
       .collect();
 
     // no other is following this tiktok user
-    if (otherFollowers.length === 0) {
-      // delete the follower
-      await ctx.db.delete(args.id);
+    if (otherFollowing.length === 0) {
+      const follower = await ctx.db
+        .query("followers")
+        .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
+        .unique();
+
+      if (follower) {
+        // delete the follower
+        await ctx.db.delete(follower?._id);
+      }
     }
   },
 });
@@ -76,19 +79,19 @@ export const paginate = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("followersUsers")
-      .withIndex("user", (q) => q.eq("user", ctx.user))
+      .query("tiktokUsers")
+      .withIndex("by_user", (q) => q.eq("user", ctx.user))
       .order("desc")
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
-      paginate.page.map(async (follower_user) => {
+      paginate.page.map(async (tiktokUser) => {
         const follower = await getOneFrom(
           ctx.db,
           "followers",
-          "by_id",
-          follower_user.follower,
-          "_id"
+          "by_uniqueId",
+          tiktokUser.uniqueId,
+          "uniqueId"
         );
 
         if (!follower) {
