@@ -1,5 +1,4 @@
 import { pick } from "convex-helpers";
-import { getOneFrom } from "convex-helpers/server/relationships";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
@@ -57,26 +56,16 @@ export const paginateVideos = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("tiktokUsers")
-      .withIndex("by_user", (q) => q.eq("user", ctx.user))
+      .query("videos")
       .order("desc")
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
-      paginate.page.map(async (tiktokUser) => {
-        const video = await getOneFrom(
-          ctx.db,
-          "videos",
-          "by_uniqueId",
-          tiktokUser.uniqueId,
-          "uniqueId"
-        );
-
-        if (!video || !video.image) {
-          return video;
+      paginate.page.map(async (video) => {
+        if (video.image) {
+          return { ...video, image: await ctx.storage.getUrl(video.image) };
         }
-
-        return { ...video, image: await ctx.storage.getUrl(video.image) };
+        return video;
       })
     );
 

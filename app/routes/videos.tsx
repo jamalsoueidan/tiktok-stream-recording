@@ -34,6 +34,7 @@ export default function Index() {
     { initialNumItems: 30 }
   );
 
+  console.log(results);
   return (
     <>
       <Stack>
