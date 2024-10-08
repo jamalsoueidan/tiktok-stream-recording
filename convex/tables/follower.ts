@@ -9,4 +9,5 @@ export const Follower = Table("followers", {
   nickname: v.optional(v.string()),
   signature: v.optional(v.string()),
   requireLogin: v.optional(v.boolean()),
+  disabled: v.boolean(),
 });

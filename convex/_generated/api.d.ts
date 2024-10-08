@@ -20,6 +20,7 @@ import type * as azure from "../azure.js";
 import type * as containerLog from "../containerLog.js";
 import type * as crons from "../crons.js";
 import type * as follower from "../follower.js";
+import type * as followersUsers from "../followersUsers.js";
 import type * as http from "../http.js";
 import type * as httpActions from "../httpActions.js";
 import type * as log from "../log.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   containerLog: typeof containerLog;
   crons: typeof crons;
   follower: typeof follower;
+  followersUsers: typeof followersUsers;
   http: typeof http;
   httpActions: typeof httpActions;
   log: typeof log;

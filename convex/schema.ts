@@ -20,8 +20,8 @@ export default defineSchema({
   containerLogs: ContainerLog.table
     .index("by_uniqueId_and_filename", ["uniqueId", "filename"])
     .index("by_filename", ["filename"]),
-  followersUsers: FollowersUsers.table.index("by_follower_and_user", [
-    "follower",
-    "user",
-  ]),
+  followersUsers: FollowersUsers.table
+    .index("user", ["user"])
+    .index("follower_user", ["follower", "user"])
+    .index("follower", ["follower"]),
 });

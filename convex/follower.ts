@@ -1,18 +1,14 @@
 import { pick } from "convex-helpers";
+import { getOneFrom } from "convex-helpers/server/relationships";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
-import {
-  action,
-  internalMutation,
-  internalQuery,
-  mutation,
-  query,
-} from "./_generated/server";
+import { internalMutation, internalQuery, query } from "./_generated/server";
+import { actionWithUser, mutationWithUser, queryWithUser } from "./auth";
 import { Follower } from "./tables/follower";
 
-export const follow = action({
+export const follow = actionWithUser({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     if (args.uniqueId.length === 0) {
@@ -20,20 +16,50 @@ export const follow = action({
     }
 
     const follower = await ctx.runQuery(internal.follower.getByUniqueId, args);
+    let follower_id;
     if (follower) {
-      throw new Error("Follower already exists");
+      follower_id = follower?._id;
+    } else {
+      follower_id = await ctx.runMutation(internal.follower.insert, args);
     }
 
-    await ctx.runMutation(internal.follower.insert, args);
+    await ctx.runMutation(internal.followersUsers.insert, {
+      follower: follower_id,
+      user: ctx.user,
+    });
+
     await ctx.scheduler.runAfter(0, api.tiktok.checkUser, args);
   },
 });
 
-export const unfollow = mutation({
+export const unfollow = mutationWithUser({
   args: {
     id: v.id("followers"),
   },
-  handler: (ctx, args) => ctx.db.delete(args.id),
+  handler: async (ctx, args) => {
+    const followerUser = await ctx.db
+      .query("followersUsers")
+      .withIndex("follower_user", (q) =>
+        q.eq("follower", args.id).eq("user", ctx.user)
+      )
+      .unique();
+    if (!followerUser) {
+      throw new Error("Follower not found");
+    }
+
+    await ctx.db.delete(followerUser._id);
+
+    const otherFollowers = await ctx.db
+      .query("followersUsers")
+      .withIndex("follower", (q) => q.eq("follower", args.id))
+      .collect();
+
+    // no other is following this tiktok user
+    if (otherFollowers.length === 0) {
+      // delete the follower
+      await ctx.db.delete(args.id);
+    }
+  },
 });
 
 export const insert = internalMutation({
@@ -42,19 +68,33 @@ export const insert = internalMutation({
     ctx.db.insert("followers", {
       cronRunAt: 0,
       uniqueId: args.uniqueId,
+      disabled: false,
     }),
 });
 
-export const paginate = query({
+export const paginate = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     const paginate = await ctx.db
-      .query("followers")
+      .query("followersUsers")
+      .withIndex("user", (q) => q.eq("user", ctx.user))
       .order("desc")
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
-      paginate.page.map(async (follower) => {
+      paginate.page.map(async (follower_user) => {
+        const follower = await getOneFrom(
+          ctx.db,
+          "followers",
+          "by_id",
+          follower_user.follower,
+          "_id"
+        );
+
+        if (!follower) {
+          throw new Error("Follower not found");
+        }
+
         const log = await ctx.db
           .query("logs")
           .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
