@@ -64,6 +64,7 @@ export const paginateVideos = queryWithUser({
   handler: async (ctx, args) => {
     const tiktokUsers = await ctx.db
       .query("tiktokUsers")
+      .filter((q) => q.neq("video", undefined))
       .withIndex("by_user", (q) => q.eq("user", ctx.user))
       .collect();
 
@@ -111,7 +112,12 @@ export const paginate = queryWithUser({
 
     const paginate = await ctx.db
       .query("videos")
-      .filter((q) => q.eq(q.field("uniqueId"), args.uniqueId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("uniqueId"), args.uniqueId),
+          q.neq("video", undefined)
+        )
+      )
       .order("desc")
       .paginate(args.paginationOpts);
 
