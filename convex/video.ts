@@ -62,8 +62,6 @@ export const paginateRecording = queryWithUser({
 export const paginateVideos = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const uniqueIds: string[] = await ctx.runQuery(api.tiktokUsers.uniqueIds);
-
     const paginate = await ctx.db
       .query("videos")
       .filter((q) => q.neq(q.field("video"), undefined))
@@ -71,14 +69,12 @@ export const paginateVideos = queryWithUser({
       .paginate(args.paginationOpts);
 
     const page = await Promise.all(
-      paginate.page
-        .filter((video) => uniqueIds.includes(video.uniqueId))
-        .map(async (video) => {
-          if (video.image) {
-            return { ...video, image: await ctx.storage.getUrl(video.image) };
-          }
-          return video;
-        })
+      paginate.page.map(async (video) => {
+        if (video.image) {
+          return { ...video, image: await ctx.storage.getUrl(video.image) };
+        }
+        return video;
+      })
     );
 
     return {
@@ -94,17 +90,6 @@ export const paginateUserVideos = queryWithUser({
     ...pick(Video.withoutSystemFields, ["uniqueId"]),
   },
   handler: async (ctx, args) => {
-    const isFollowing = await ctx.db
-      .query("tiktokUsers")
-      .withIndex("by_user_and_uniqueId", (q) =>
-        q.eq("user", ctx.user).eq("uniqueId", args.uniqueId)
-      )
-      .first();
-
-    if (!isFollowing) {
-      throw new Error("No Access");
-    }
-
     const paginate = await ctx.db
       .query("videos")
       .filter((q) =>
