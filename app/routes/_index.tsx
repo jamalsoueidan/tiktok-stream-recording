@@ -20,7 +20,6 @@ import { api } from "convex/_generated/api";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { FollowerForm } from "~/components/FollowerForm";
 
 dayjs.extend(relativeTime);
 
@@ -50,8 +49,6 @@ export default function Index() {
         record. When they go live, we will automatically start recording for
         you.
       </Text>
-
-      <FollowerForm />
     </Stack>
   ) : (
     <>

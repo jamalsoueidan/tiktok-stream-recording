@@ -25,11 +25,12 @@ import {
   Unauthenticated,
 } from "convex/react";
 import { useState } from "react";
-import { FaHome, FaVideo } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 import { FollowerForm } from "./components/FollowerForm";
 import { MonitorButton } from "./components/MonitorButton";
 import { SignIn } from "./components/SignIn";
 import { SignOutButton } from "./components/Signout";
+import { VideosButton } from "./components/VideosButton";
 
 export async function loader() {
   const CONVEX_URL = process.env["CONVEX_URL"]!;
@@ -66,15 +67,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     Home
                   </Button>
                   <FollowerForm />
-                  <Button
-                    component={Link}
-                    to="/videos"
-                    color="green"
-                    size="lg"
-                    leftSection={<FaVideo />}
-                  >
-                    Videos
-                  </Button>
+                  <VideosButton />
                   <MonitorButton />
                   <SignOutButton />
                 </Flex>

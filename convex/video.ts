@@ -30,6 +30,18 @@ export const countRecording = queryWithUser({
   },
 });
 
+export const countVideos = queryWithUser({
+  args: {},
+  handler: async (ctx) => {
+    const videos = await ctx.db
+      .query("videos")
+      .filter((q) => q.neq(q.field("video"), undefined))
+      .collect();
+
+    return videos.length;
+  },
+});
+
 export const paginateRecording = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
