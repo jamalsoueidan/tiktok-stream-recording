@@ -1,10 +1,12 @@
 import { Button, TextInput } from "@mantine/core";
+import { useNavigate } from "@remix-run/react";
 import { api } from "convex/_generated/api";
 import { useAction } from "convex/react";
 import { useState } from "react";
 
 export const FollowerForm = () => {
   const [uniqueId, setUniqueId] = useState("");
+  const navigate = useNavigate();
   const addFollower = useAction(api.follower.follow);
 
   return (
@@ -21,6 +23,7 @@ export const FollowerForm = () => {
         onClick={() => {
           addFollower({ uniqueId }).then(() => {
             setUniqueId("");
+            navigate("/");
           });
         }}
       >

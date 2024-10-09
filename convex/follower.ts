@@ -25,12 +25,12 @@ export const follow = actionWithUser({
       await ctx.runMutation(internal.follower.insert, {
         uniqueId,
       });
-    }
 
-    await ctx.runMutation(internal.tiktokUsers.insert, {
-      uniqueId,
-      user: ctx.user,
-    });
+      await ctx.runMutation(internal.tiktokUsers.insert, {
+        uniqueId,
+        user: ctx.user,
+      });
+    }
 
     await ctx.scheduler.runAfter(0, api.tiktok.getTiktokMetadata, {
       uniqueId,

@@ -71,7 +71,7 @@ export const getStreamData = action({
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Cookie: "sessionid_ss=test; tt-target-idc=useast2a;",
+        Cookie: "sessionid_ss=; tt-target-idc=useast2a;",
       },
       credentials: "include", // This ensures that cookies are sent in the request
     });

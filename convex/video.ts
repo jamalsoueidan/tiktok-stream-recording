@@ -99,10 +99,10 @@ export const paginateUserVideos = queryWithUser({
       .withIndex("by_user_and_uniqueId", (q) =>
         q.eq("user", ctx.user).eq("uniqueId", args.uniqueId)
       )
-      .unique();
+      .first();
 
     if (!isFollowing) {
-      throw new Error("not access");
+      throw new Error("No Access");
     }
 
     const paginate = await ctx.db
