@@ -36,7 +36,12 @@ export const captureVideoFromStream = async (
     .output(videoOutput)
     .videoCodec("copy")
     .audioCodec("copy")
-    .outputOptions("-movflags", "faststart");
+    .outputOptions("-movflags", "faststart")
+    .inputOptions([
+      "-reconnect 1", // Enable reconnection
+      "-reconnect_streamed 1", // Allow reconnection for streamed media
+      "-reconnect_delay_max 15", // Retry for up to 5 seconds if the stream is interrupted
+    ]);
 
   if (process.env.FFMPEG_DURATION) {
     ffmpegCommand.duration(process.env.FFMPEG_DURATION);
@@ -76,6 +81,9 @@ const getVideoMetadata = (videoOutput: string, quality: string) => {
 
     const duration = metadata.format.duration; // Duration in seconds
     const fileSize = metadata.format.size; // File size in bytes
+    const videoStream = metadata.streams.find(
+      (stream) => stream.codec_type === "video"
+    );
 
     if (!fileSize || !duration) {
       console.log("filesize or duration is null");
@@ -90,6 +98,8 @@ const getVideoMetadata = (videoOutput: string, quality: string) => {
       duration: Math.floor(duration),
       fileSizeMB,
       quality,
+      width: videoStream?.width,
+      height: videoStream?.height,
     });
   });
 };

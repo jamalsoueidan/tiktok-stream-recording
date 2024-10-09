@@ -11,6 +11,20 @@ import { action, mutation, query } from "./_generated/server";
 
 export const { auth, signIn, signOut, store } = convexAuth({
   providers: [Password],
+  callbacks: {
+    async createOrUpdateUser(ctx, args) {
+      if (args.existingUserId) {
+        await ctx.db.patch(args.existingUserId, { updatingTime: Date.now() });
+        return args.existingUserId;
+      }
+
+      return ctx.db.insert("users", {
+        ...args.profile,
+        accessLevel: 0,
+        updatingTime: Date.now(),
+      });
+    },
+  },
 });
 
 export const mutationWithUser = customMutation(

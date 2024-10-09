@@ -1,33 +1,30 @@
-import { AspectRatio } from "@mantine/core";
 import { useParams } from "@remix-run/react";
 import { api } from "convex/_generated/api";
 import { Id } from "convex/_generated/dataModel";
 import { useAction } from "convex/react";
+import { FunctionReturnType } from "convex/server";
 import { useEffect, useState } from "react";
-import ReactPlayer from "react-player";
 
 export default function Stream() {
   const params = useParams();
-  const [url, setUrl] = useState<string | undefined>();
-  const video = useAction(api.azure.generateURL);
+  const [video, setVideo] = useState<
+    FunctionReturnType<typeof api.azure.generateURL> | undefined
+  >(undefined);
+  const loadVideo = useAction(api.azure.generateURL);
 
   useEffect(() => {
-    video({ id: params.videoId as Id<"videos"> }).then(setUrl);
+    loadVideo({ id: params.videoId as Id<"videos"> }).then(setVideo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!url) {
+  if (!video) {
     return <>Wait a minute...</>;
   }
+
   return (
-    <AspectRatio ratio={2 / 1}>
-      <ReactPlayer
-        url={url}
-        playing={false}
-        controls
-        width="100%"
-        height="100%"
-      />
-    </AspectRatio>
+    <video controls width="100%" height="100%" style={{ position: "relative" }}>
+      <source src={video.url} type="video/mp4" />
+      <track kind="captions" default />
+    </video>
   );
 }

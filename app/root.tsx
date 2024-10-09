@@ -2,15 +2,8 @@ import "@mantine/charts/styles.css";
 import "@mantine/core/styles.css";
 
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
+import { ColorSchemeScript, Container, MantineProvider } from "@mantine/core";
 import {
-  Button,
-  ColorSchemeScript,
-  Container,
-  Flex,
-  MantineProvider,
-} from "@mantine/core";
-import {
-  Link,
   Links,
   Meta,
   Outlet,
@@ -25,12 +18,8 @@ import {
   Unauthenticated,
 } from "convex/react";
 import { useState } from "react";
-import { FaHome } from "react-icons/fa";
-import { FollowerForm } from "./components/FollowerForm";
-import { MonitorButton } from "./components/MonitorButton";
+import { Navigation } from "./components/Navigation";
 import { SignIn } from "./components/SignIn";
-import { SignOutButton } from "./components/Signout";
-import { VideosButton } from "./components/VideosButton";
 
 export async function loader() {
   const CONVEX_URL = process.env["CONVEX_URL"]!;
@@ -56,21 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <ConvexAuthProvider client={convex}>
             <Authenticated>
               <Container fluid p="md">
-                <Flex flex="1" gap="xs" w="100%" mb="md">
-                  <Button
-                    component={Link}
-                    to="/"
-                    color="blue"
-                    size="lg"
-                    leftSection={<FaHome />}
-                  >
-                    Home
-                  </Button>
-                  <FollowerForm />
-                  <VideosButton />
-                  <MonitorButton />
-                  <SignOutButton />
-                </Flex>
+                <Navigation />
                 {children}
               </Container>
             </Authenticated>

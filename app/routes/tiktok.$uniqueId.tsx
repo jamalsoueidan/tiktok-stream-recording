@@ -1,4 +1,3 @@
-import { BubbleChart } from "@mantine/charts";
 import {
   Avatar,
   Badge,
@@ -28,6 +27,7 @@ import { useAction, usePaginatedQuery, useQuery } from "convex/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useState } from "react";
+import { FaRegCircle, FaStackExchange, FaTiktok } from "react-icons/fa";
 
 dayjs.extend(relativeTime);
 
@@ -36,9 +36,6 @@ export default function Index() {
   const navigate = useNavigate();
   const params = useParams();
   const follower = useQuery(api.follower.get, {
-    uniqueId: params.uniqueId || "",
-  });
-  const stats = useQuery(api.log.stats, {
     uniqueId: params.uniqueId || "",
   });
 
@@ -68,7 +65,7 @@ export default function Index() {
           <Card>
             <Flex align="center" justify="space-between">
               <Group>
-                <Avatar src={follower.avatarMedium} size="lg" />
+                <Avatar src={follower.avatarMedium} size="xl" />
                 <div>
                   <Flex align="center" gap="sm">
                     <Title order={2}>{follower.uniqueId}</Title>
@@ -88,12 +85,23 @@ export default function Index() {
               <Flex justify="flex-end" gap="md">
                 {log?.live && log.roomId ? (
                   <Button
+                    color="black"
                     component={Link}
-                    to={`/tiktok/${follower.uniqueId}/stream/${log.roomId}`}
+                    to={`https://www.tiktok.com/@${follower.uniqueId}/live`}
+                    target="_blank"
+                    leftSection={<FaTiktok />}
                   >
-                    Watch stream
+                    Live
                   </Button>
                 ) : null}
+                <Button
+                  component={Link}
+                  to={`/tiktok/${follower.uniqueId}/stats`}
+                  loading={loading}
+                  leftSection={<FaStackExchange />}
+                >
+                  Stats
+                </Button>
                 <Button
                   onClick={() => {
                     setLoading(true);
@@ -104,23 +112,15 @@ export default function Index() {
                     });
                   }}
                   loading={loading}
+                  leftSection={<FaRegCircle />}
                 >
-                  Update
+                  Refresh
                 </Button>
               </Flex>
             </Flex>
             <Card.Section my="md">
               <Divider />
             </Card.Section>
-
-            <BubbleChart
-              h={60}
-              data={stats || []}
-              range={[50, 100]}
-              label="Online hours"
-              dataKey={{ x: "hour", y: "index", z: "value" }}
-              color="blue"
-            />
           </Card>
         ) : null}
         {!results.length ? (
@@ -154,9 +154,14 @@ export default function Index() {
           </>
         )}
       </Stack>
-      <Modal opened={inOulet} onClose={() => navigate(-1)} size="xl">
-        <Outlet />
-      </Modal>
+      <Modal.Root opened={inOulet} onClose={() => navigate(-1)}>
+        <Modal.Overlay />
+        <Modal.Content>
+          <Modal.Body style={{ overflow: "hidden" }}>
+            <Outlet />
+          </Modal.Body>
+        </Modal.Content>
+      </Modal.Root>
     </>
   );
 }

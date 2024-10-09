@@ -56,6 +56,8 @@ export const saveVideo = httpAction(async (ctx, request) => {
     quality: metadata.quality,
     duration: metadata.duration,
     fileSizeMB: metadata.fileSizeMB,
+    width: metadata.width,
+    height: metadata.height,
   });
 
   await ctx.runMutation(internal.video.update, {
@@ -65,6 +67,8 @@ export const saveVideo = httpAction(async (ctx, request) => {
     quality: metadata.quality,
     durationSec: metadata.duration,
     fileSizeMB: metadata.fileSizeMB,
+    width: metadata.width,
+    height: metadata.height,
   });
 
   //terminate container after 10min

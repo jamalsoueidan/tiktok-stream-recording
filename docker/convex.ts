@@ -37,7 +37,13 @@ export const sendImage = async (imagePath: string) => {
 
 export const sendVideo = async (
   videoPath: string,
-  metadata: { duration: number; quality: string; fileSizeMB: string }
+  metadata: {
+    duration: number;
+    quality: string;
+    fileSizeMB: string;
+    width?: number;
+    height?: number;
+  }
 ) => {
   if (!process.env.POST_VIDEO_URL) {
     console.log("POST_VIDEO_URL is not defined");

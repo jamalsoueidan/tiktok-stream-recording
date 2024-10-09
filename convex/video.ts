@@ -12,7 +12,11 @@ export const get = internalQuery({
     id: v.id("videos"),
   },
   handler: async (ctx, args) => {
-    return ctx.db.get(args.id);
+    const video = await ctx.db.get(args.id);
+    if (!video) {
+      throw new Error("Video not found");
+    }
+    return video;
   },
 });
 

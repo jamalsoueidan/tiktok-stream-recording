@@ -78,7 +78,7 @@ export const startRecording = action({
         containers: [
           {
             name: containerName,
-            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v14`,
+            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v15`,
             resources: {
               requests: {
                 cpu: 1,
@@ -187,8 +187,10 @@ export const generateURL = action({
     id: v.id("videos"),
   },
   handler: async (ctx, args) => {
-    const video = await ctx.runQuery(internal.video.get, { id: args.id });
-    if (!video || !video.video) {
+    const video: Video = await ctx.runQuery(internal.video.get, {
+      id: args.id,
+    });
+    if (!video.video) {
       throw new Error("Video not found");
     }
 
@@ -217,8 +219,13 @@ export const generateURL = action({
       sharedKeyCredential
     ).toString();
 
-    const sasUrl = `https://${process.env.STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${containerName}/${blobName}?${sasToken}`;
-    return sasUrl;
+    const url = `https://${process.env.STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${containerName}/${blobName}?${sasToken}`;
+    return {
+      ...video,
+      url,
+      width: video.width || 720,
+      height: video.height || 1280,
+    };
   },
 });
 

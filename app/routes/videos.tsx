@@ -36,7 +36,7 @@ export default function Index() {
 
   return (
     <>
-      <Stack align="center">
+      <Stack align="center" mb="xl">
         <Title>Videos</Title>
         <Text>All Recorded Streams</Text>
       </Stack>
@@ -98,9 +98,14 @@ export default function Index() {
         </Flex>
       ) : null}
 
-      <Modal opened={inOulet} onClose={() => navigate(-1)} size="xl">
-        <Outlet />
-      </Modal>
+      <Modal.Root opened={inOulet} onClose={() => navigate(-1)}>
+        <Modal.Overlay />
+        <Modal.Content>
+          <Modal.Body style={{ overflow: "hidden" }}>
+            <Outlet />
+          </Modal.Body>
+        </Modal.Content>
+      </Modal.Root>
     </>
   );
 }

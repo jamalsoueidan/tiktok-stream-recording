@@ -20,6 +20,7 @@ import { api } from "convex/_generated/api";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { FaTiktok } from "react-icons/fa";
 
 dayjs.extend(relativeTime);
 
@@ -123,9 +124,10 @@ export default function Index() {
                   to={`https://www.tiktok.com/@${follower.uniqueId}`}
                   target="_blank"
                   color="black"
+                  leftSection={<FaTiktok />}
                   size="compact-xs"
                 >
-                  See Tiktok
+                  Go
                 </Button>
               </Flex>
             </Card>

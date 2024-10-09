@@ -1,7 +1,7 @@
 import { Table } from "convex-helpers/server";
-import { v } from "convex/values";
+import { Infer, v } from "convex/values";
 
-export const Video = Table("videos", {
+const videoTable = {
   uniqueId: v.string(),
   filename: v.string(),
   image: v.optional(v.id("_storage")),
@@ -9,4 +9,11 @@ export const Video = Table("videos", {
   quality: v.optional(v.string()),
   fileSizeMB: v.optional(v.string()),
   durationSec: v.optional(v.number()),
-});
+  width: v.optional(v.number()),
+  height: v.optional(v.number()),
+};
+
+const videoObect = v.object(videoTable);
+
+export type Video = Infer<typeof videoObect>;
+export const Video = Table("videos", videoTable);

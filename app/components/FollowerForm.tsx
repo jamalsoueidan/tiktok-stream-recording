@@ -3,10 +3,12 @@ import { useNavigate } from "@remix-run/react";
 import { api } from "convex/_generated/api";
 import { useAction } from "convex/react";
 import { useState } from "react";
+import { useMobile } from "~/lib/useMobile";
 
 export const FollowerForm = () => {
   const [uniqueId, setUniqueId] = useState("");
   const navigate = useNavigate();
+  const isMobile = useMobile();
   const addFollower = useAction(api.follower.follow);
 
   return (
@@ -14,12 +16,12 @@ export const FollowerForm = () => {
       <TextInput
         placeholder="Enter tiktok user @neymarjr"
         value={uniqueId}
-        size="lg"
+        size={isMobile ? "xs" : "lg"}
         onChange={(event) => setUniqueId(event.currentTarget.value)}
         flex="1"
       />
       <Button
-        size="lg"
+        size={isMobile ? "xs" : "lg"}
         onClick={() => {
           addFollower({ uniqueId }).then(() => {
             setUniqueId("");
