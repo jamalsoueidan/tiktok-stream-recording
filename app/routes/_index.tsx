@@ -20,6 +20,7 @@ import { api } from "convex/_generated/api";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useEffect } from "react";
 import { FaTiktok } from "react-icons/fa";
 
 dayjs.extend(relativeTime);
@@ -41,6 +42,12 @@ export default function Index() {
     { initialNumItems: 12 }
   );
   const unfollow = useMutation(api.follower.unfollow);
+  const updateLoggedInDate = useMutation(api.user.updateLoggedInDate);
+
+  useEffect(() => {
+    updateLoggedInDate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return !results.length ? (
     <Stack justify="center">

@@ -26,10 +26,12 @@ import type * as log from "../log.js";
 import type * as tables_follower from "../tables/follower.js";
 import type * as tables_log from "../tables/log.js";
 import type * as tables_tiktokUsers from "../tables/tiktokUsers.js";
+import type * as tables_user from "../tables/user.js";
 import type * as tables_video from "../tables/video.js";
 import type * as tables__containerLog from "../tables/_containerLog.js";
 import type * as tiktok from "../tiktok.js";
 import type * as tiktokUsers from "../tiktokUsers.js";
+import type * as user from "../user.js";
 import type * as video from "../video.js";
 
 /**
@@ -52,10 +54,12 @@ declare const fullApi: ApiFromModules<{
   "tables/follower": typeof tables_follower;
   "tables/log": typeof tables_log;
   "tables/tiktokUsers": typeof tables_tiktokUsers;
+  "tables/user": typeof tables_user;
   "tables/video": typeof tables_video;
   "tables/_containerLog": typeof tables__containerLog;
   tiktok: typeof tiktok;
   tiktokUsers: typeof tiktokUsers;
+  user: typeof user;
   video: typeof video;
 }>;
 export declare const api: FilterApi<
