@@ -38,7 +38,7 @@ export default function Index() {
     <>
       <Stack align="center">
         <Title>Videos</Title>
-        <Text>All streams that are recorded by all users. </Text>
+        <Text>All Recorded Streams</Text>
       </Stack>
 
       <Grid>
