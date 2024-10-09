@@ -71,15 +71,21 @@ export function SignIn() {
         direction="column"
         justify="space-between"
       >
-        <Title c="orange" fw="600">
-          Tiktik Record Stream ●
-        </Title>
-
-        <Text c="orange" fw="500">
-          This project is designed to automate the process of recording live
-          TikTok streams, storing them, and managing video. Just follow tiktok
-          users in the web app, and then it will automatically record their
-          stream when they are live.
+        <Flex direction="column">
+          <Title c="orange" fw="600">
+            Tiktik Record Stream ●
+          </Title>
+          <Text c="orange" fw="500">
+            Automatically record TikTok users streams when they go live.
+          </Text>
+        </Flex>
+        <Text c="dimmed" size="sm">
+          This app is a fun project I&apos;ve developed, and it&apos;s currently
+          free to use. I&apos;m covering around $100 per month for backend
+          costs, including proxy servers, database, and storage. However, if the
+          costs become too high, I may need to shut down the service. If you
+          find it useful and want to support the project, feel free to donate on
+          GitHub—
         </Text>
       </Flex>
     </Group>
