@@ -93,7 +93,11 @@ export default function Index() {
             ))}
           </Grid>
           {status === "CanLoadMore" ? (
-            <Button onClick={() => loadMore(10)}>Load More</Button>
+            <Flex mt="md">
+              <Button onClick={() => loadMore(10)} fullWidth>
+                Load More
+              </Button>
+            </Flex>
           ) : null}
         </>
       )}
