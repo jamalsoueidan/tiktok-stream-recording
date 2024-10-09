@@ -43,7 +43,7 @@ export default function Index() {
   });
 
   const { results, status, loadMore } = usePaginatedQuery(
-    api.video.paginate,
+    api.video.paginateUserVideos,
     { uniqueId: params.uniqueId || "" },
     { initialNumItems: 30 }
   );
@@ -123,28 +123,36 @@ export default function Index() {
             />
           </Card>
         ) : null}
-        <Grid gutter="xs">
-          {results?.map((video) => (
-            <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
-              <Paper
-                key={video._id}
-                component={Link}
-                to={`/tiktok/${video.uniqueId}/watch/${video._id}`}
-              >
-                <Image
-                  radius="md"
-                  h="auto"
-                  w="100%"
-                  fit="contain"
-                  src={video.image}
-                />
-              </Paper>
-            </Grid.Col>
-          ))}
-        </Grid>
-        {status === "CanLoadMore" ? (
-          <Button onClick={() => loadMore(10)}>Load More</Button>
-        ) : null}
+        {!results.length ? (
+          <Flex justify="center">
+            <Text>No videos available. The user has not streamed yet.</Text>
+          </Flex>
+        ) : (
+          <>
+            <Grid gutter="xs">
+              {results?.map((video) => (
+                <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
+                  <Paper
+                    key={video._id}
+                    component={Link}
+                    to={`/tiktok/${video.uniqueId}/watch/${video._id}`}
+                  >
+                    <Image
+                      radius="md"
+                      h="auto"
+                      w="100%"
+                      fit="contain"
+                      src={video.image}
+                    />
+                  </Paper>
+                </Grid.Col>
+              ))}
+            </Grid>
+            {status === "CanLoadMore" ? (
+              <Button onClick={() => loadMore(10)}>Load More</Button>
+            ) : null}
+          </>
+        )}
       </Stack>
       <Modal opened={inOulet} onClose={() => navigate(-1)} size="xl">
         <Outlet />

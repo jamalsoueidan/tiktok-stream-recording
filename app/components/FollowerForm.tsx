@@ -10,7 +10,7 @@ export const FollowerForm = () => {
   return (
     <>
       <TextInput
-        placeholder="Add follower"
+        placeholder="Enter tiktok user @neymarjr"
         value={uniqueId}
         size="lg"
         onChange={(event) => setUniqueId(event.currentTarget.value)}

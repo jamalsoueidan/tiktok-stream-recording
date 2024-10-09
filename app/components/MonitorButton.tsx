@@ -16,7 +16,7 @@ export const MonitorButton = () => {
         size="lg"
         leftSection={<FaRecordVinyl />}
       >
-        Monitor
+        Recordings
       </Button>
     </Indicator>
   );

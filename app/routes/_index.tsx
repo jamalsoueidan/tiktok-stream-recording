@@ -20,6 +20,7 @@ import { api } from "convex/_generated/api";
 import { useMutation, usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { FollowerForm } from "~/components/FollowerForm";
 
 dayjs.extend(relativeTime);
 
@@ -41,8 +42,19 @@ export default function Index() {
   );
   const unfollow = useMutation(api.follower.unfollow);
 
-  return (
-    <Stack>
+  return !results.length ? (
+    <Stack justify="center">
+      <Title>No followers added yet!</Title>
+      <Text>
+        To get started, add the TikTok users whose live streams you want to
+        record. When they go live, we will automatically start recording for
+        you.
+      </Text>
+
+      <FollowerForm />
+    </Stack>
+  ) : (
+    <>
       <Grid gutter="xs">
         {results?.map((follower) => (
           <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={follower._id}>
@@ -59,6 +71,7 @@ export default function Index() {
                 <Box pos="relative">
                   <Image
                     src={follower.avatarMedium}
+                    fallbackSrc="https://placehold.co/400x400?text=Require login"
                     radius="md"
                     w="100%"
                     h="auto"
@@ -122,13 +135,11 @@ export default function Index() {
           </Grid.Col>
         ))}
       </Grid>
-      <Button
-        onClick={() => loadMore(10)}
-        disabled={status !== "CanLoadMore"}
-        loading={status === "LoadingMore"}
-      >
-        Load More
-      </Button>
-    </Stack>
+      {status === "CanLoadMore" ? (
+        <Flex mt="md">
+          <Button onClick={() => loadMore(10)}>Load More</Button>
+        </Flex>
+      ) : null}
+    </>
   );
 }

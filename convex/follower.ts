@@ -11,23 +11,33 @@ import { Follower } from "./tables/follower";
 export const follow = actionWithUser({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
-    if (args.uniqueId.length === 0) {
+    if (args.uniqueId.length <= 1) {
       throw new Error("Follower uniqueId is required");
     }
 
-    const follower = await ctx.runQuery(internal.follower.getByUniqueId, args);
+    const uniqueId = args.uniqueId.replace("@", "");
+
+    const follower = await ctx.runQuery(internal.follower.getByUniqueId, {
+      uniqueId,
+    });
 
     if (!follower) {
-      await ctx.runMutation(internal.follower.insert, args);
+      await ctx.runMutation(internal.follower.insert, {
+        uniqueId,
+      });
     }
 
     await ctx.runMutation(internal.tiktokUsers.insert, {
-      uniqueId: args.uniqueId,
+      uniqueId,
       user: ctx.user,
     });
 
-    await ctx.scheduler.runAfter(0, api.tiktok.getTiktokMetadata, args);
-    await ctx.scheduler.runAfter(0, api.tiktok.checkUser, args);
+    await ctx.scheduler.runAfter(0, api.tiktok.getTiktokMetadata, {
+      uniqueId,
+    });
+    await ctx.scheduler.runAfter(0, api.tiktok.checkUser, {
+      uniqueId,
+    });
   },
 });
 

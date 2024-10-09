@@ -66,7 +66,7 @@ export const paginateVideos = queryWithUser({
 
     const paginate = await ctx.db
       .query("videos")
-      .filter((q) => q.neq("video", undefined))
+      .filter((q) => q.neq(q.field("video"), undefined))
       .order("desc")
       .paginate(args.paginationOpts);
 
@@ -88,7 +88,7 @@ export const paginateVideos = queryWithUser({
   },
 });
 
-export const paginate = queryWithUser({
+export const paginateUserVideos = queryWithUser({
   args: {
     paginationOpts: paginationOptsValidator,
     ...pick(Video.withoutSystemFields, ["uniqueId"]),

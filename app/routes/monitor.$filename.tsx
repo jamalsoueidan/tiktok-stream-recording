@@ -10,8 +10,6 @@ export default function Stream() {
     filename: params.filename as string,
   });
 
-  console.log(logs);
-
   return (
     <>
       {logs?.map((log) => (
