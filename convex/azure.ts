@@ -212,7 +212,7 @@ export const generateURL = action({
         blobName,
         permissions: BlobSASPermissions.parse("r"), // Read-only permissions
         startsOn: new Date(),
-        expiresOn: new Date(new Date().valueOf() + 3600 * 1000), // 1-hour expiry
+        expiresOn: new Date(new Date().valueOf() + 1800 * 1000), // 30min expiry
       },
       sharedKeyCredential
     ).toString();
