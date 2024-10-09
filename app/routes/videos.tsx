@@ -36,71 +36,67 @@ export default function Index() {
 
   return (
     <>
-      {!results.length ? (
-        <Stack align="center">
-          <Title>Videos</Title>
-          <Text>No videos available. </Text>
-        </Stack>
-      ) : (
-        <>
-          <Grid>
-            {results?.map((video) => (
-              <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
-                <Card
-                  withBorder
-                  shadow="md"
-                  p="xs"
-                  component={Link}
-                  to={`/videos/${video._id}`}
+      <Stack align="center">
+        <Title>Videos</Title>
+        <Text>All streams that are recorded by all users. </Text>
+      </Stack>
+
+      <Grid>
+        {results?.map((video) => (
+          <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
+            <Card
+              withBorder
+              shadow="md"
+              p="xs"
+              component={Link}
+              to={`/videos/${video._id}`}
+            >
+              <Box pos="relative">
+                <Image
+                  src={video.image}
+                  radius="md"
+                  w="100%"
+                  mah={rem(250)}
+                  fit="contain"
+                />
+                <ThemeIcon
+                  size={rem(90)}
+                  color="transparent"
+                  pos="absolute"
+                  top="50%"
+                  left="50%"
+                  style={{
+                    transform: "translate(-50%, -50%)",
+                    opacity: 0.5,
+                  }}
                 >
-                  <Box pos="relative">
-                    <Image
-                      src={video.image}
-                      radius="md"
-                      w="100%"
-                      mah={rem(250)}
-                      fit="contain"
-                    />
-                    <ThemeIcon
-                      size={rem(90)}
-                      color="transparent"
-                      pos="absolute"
-                      top="50%"
-                      left="50%"
-                      style={{
-                        transform: "translate(-50%, -50%)",
-                        opacity: 0.5,
-                      }}
-                    >
-                      <FaVideo style={{ width: "80%", height: "80%" }} />
-                    </ThemeIcon>
-                    {video.durationSec ? (
-                      <Badge pos="absolute" bottom="0" right="0" color="black">
-                        <Text fz="sm">{formatDuration(video.durationSec)}</Text>
-                      </Badge>
-                    ) : null}
-                  </Box>
+                  <FaVideo style={{ width: "80%", height: "80%" }} />
+                </ThemeIcon>
+                {video.durationSec ? (
+                  <Badge pos="absolute" bottom="0" right="0" color="black">
+                    <Text fz="sm">{formatDuration(video.durationSec)}</Text>
+                  </Badge>
+                ) : null}
+              </Box>
 
-                  <Flex justify="space-between" align="center" mt={rem(4)}>
-                    <Title fz="lg">{video.uniqueId}</Title>
-                  </Flex>
+              <Flex justify="space-between" align="center" mt={rem(4)}>
+                <Title fz="lg">{video.uniqueId}</Title>
+              </Flex>
 
-                  <Text c="dimmed" fz="sm">
-                    {dayjs(video._creationTime).format(`LLL`)}
-                  </Text>
-                </Card>
-              </Grid.Col>
-            ))}
-          </Grid>
-          {status === "CanLoadMore" ? (
-            <Flex mt="md">
-              <Button onClick={() => loadMore(10)} fullWidth>
-                Load More
-              </Button>
-            </Flex>
-          ) : null}
-        </>
-      )}
+              <Text c="dimmed" fz="sm">
+                {dayjs(video._creationTime).format(`LLL`)}
+              </Text>
+            </Card>
+          </Grid.Col>
+        ))}
+      </Grid>
+      {status === "CanLoadMore" ? (
+        <Flex mt="md">
+          <Button onClick={() => loadMore(10)} fullWidth>
+            Load More
+          </Button>
+        </Flex>
+      ) : null}
 
       <Modal opened={inOulet} onClose={() => navigate(-1)} size="xl">
         <Outlet />
