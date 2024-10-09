@@ -11,7 +11,7 @@ export const VideosButton = () => {
     <Indicator inline size={24} offset={4} label={count} color="black">
       <Button
         component={Link}
-        to="/monitor"
+        to="/videos"
         color="red"
         size="lg"
         leftSection={<FaVideo />}
