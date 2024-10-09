@@ -3,10 +3,6 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-crons.interval(
-  "check who is online",
-  { minutes: 15 },
-  internal.tiktok.checkAll
-);
+crons.interval("check who is online", { minutes: 5 }, internal.tiktok.checkAll);
 
 export default crons;

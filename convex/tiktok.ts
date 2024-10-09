@@ -109,7 +109,7 @@ export const checkAll = internalAction({
     console.log(`${users.length} users to check is streaming live`);
 
     for (const [index, user] of users.entries()) {
-      await ctx.scheduler.runAfter(ms(`${index * 15}s`), api.tiktok.checkUser, {
+      await ctx.scheduler.runAfter(ms(`${index * 20}s`), api.tiktok.checkUser, {
         uniqueId: user.uniqueId,
       });
     }

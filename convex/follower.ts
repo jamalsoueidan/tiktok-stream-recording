@@ -173,7 +173,7 @@ export const getAllNotUpdated = internalQuery({
     ctx.db
       .query("followers")
       .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 15 * 60000)) // 60000 stands for one minute in milliseconds
-      .take(15),
+      .take(20),
 });
 
 export const update = internalMutation({
