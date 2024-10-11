@@ -109,12 +109,6 @@ export const paginate = queryWithUser({
           throw new Error("Follower not found");
         }
 
-        const log = await ctx.db
-          .query("logs")
-          .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
-          .order("desc")
-          .first();
-
         const video = await ctx.db
           .query("videos")
           .withIndex("by_uniqueId_and_video", (q) =>
@@ -123,7 +117,7 @@ export const paginate = queryWithUser({
           .order("desc")
           .first();
 
-        return { ...follower, log, recording: video ? true : false };
+        return { ...follower, recording: video ? true : false };
       })
     );
 
@@ -155,16 +149,7 @@ export const get = query({
       throw new Error("Follower not found");
     }
 
-    const log = await ctx.db
-      .query("logs")
-      .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
-      .order("desc")
-      .first();
-
-    return {
-      ...follower,
-      log,
-    };
+    return follower;
   },
 });
 
@@ -179,16 +164,7 @@ export const getAllNotUpdated = internalQuery({
 export const update = internalMutation({
   args: {
     id: v.id("followers"),
-    ...partial(
-      pick(Follower.withoutSystemFields, [
-        "cronRunAt",
-        "avatarMedium",
-        "avatarLarger",
-        "nickname",
-        "signature",
-        "requireLogin",
-      ])
-    ),
+    ...partial(Follower.withoutSystemFields),
   },
   handler: async (ctx, args) => {
     const { id, ...rest } = args;

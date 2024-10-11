@@ -66,7 +66,7 @@ export default function Index() {
             <Card
               p={rem(6)}
               radius="md"
-              withBorder={follower.log?.live}
+              withBorder={follower.live}
               style={{ borderColor: "green" }}
             >
               <UnstyledButton
@@ -89,7 +89,7 @@ export default function Index() {
                     opacity={0.8}
                     gap={rem(4)}
                   >
-                    {follower.log?.live ? (
+                    {follower.live ? (
                       <Badge color="green" size="xs">
                         Live
                       </Badge>
@@ -106,9 +106,9 @@ export default function Index() {
                     <Title fz="md">{follower.uniqueId}</Title>
                   </Group>
                   <Text fz="xs" c="dimmed">
-                    {follower.log?._creationTime
+                    {follower._creationTime
                       ? "updated " +
-                        dayjs().from(dayjs(follower.log?._creationTime), true) +
+                        dayjs().from(dayjs(follower._creationTime), true) +
                         " ago"
                       : null}
                   </Text>

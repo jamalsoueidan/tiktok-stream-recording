@@ -2,7 +2,6 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema } from "convex/server";
 import { ContainerLog } from "./tables/_containerLog";
 import { Follower } from "./tables/follower";
-import { Log } from "./tables/log";
 import { TiktokUsers } from "./tables/tiktokUsers";
 import { User } from "./tables/user";
 import { Video } from "./tables/video";
@@ -10,9 +9,6 @@ import { Video } from "./tables/video";
 export default defineSchema({
   ...authTables,
   users: User.table,
-  logs: Log.table
-    .index("by_uniqueId", ["uniqueId"])
-    .index("by_uniqueId_and_live", ["uniqueId", "live"]),
   followers: Follower.table.index("by_uniqueId", ["uniqueId"]),
   videos: Video.table
     .index("by_uniqueId", ["uniqueId"])

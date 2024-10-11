@@ -133,16 +133,7 @@ export const checkUser = action({
 
     const followerId = follower._id;
 
-    await ctx.runMutation(internal.follower.update, {
-      id: followerId,
-      cronRunAt: Date.now(),
-    });
-
     const roomId = await ctx.runAction(internal.tiktok.getRoomId, {
-      uniqueId: args.uniqueId,
-    });
-
-    const logId = await ctx.runMutation(internal.log.save, {
       uniqueId: args.uniqueId,
     });
 
@@ -150,7 +141,8 @@ export const checkUser = action({
     if (!roomId) {
       await ctx.runMutation(internal.follower.update, {
         id: followerId,
-        requireLogin: true,
+        cronRunAt: Date.now(),
+        live: false,
       });
 
       return;
@@ -158,12 +150,6 @@ export const checkUser = action({
 
     const live = await ctx.runAction(internal.tiktok.getLiveStatus, {
       roomId,
-    });
-
-    await ctx.runMutation(internal.log.update, {
-      id: logId,
-      live,
-      roomId: roomId,
     });
 
     let requireLogin = false;
@@ -187,6 +173,7 @@ export const checkUser = action({
       id: followerId,
       cronRunAt: Date.now(),
       requireLogin,
+      live,
     });
   },
 });

@@ -47,8 +47,6 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const checkUser = useAction(api.tiktok.checkUser);
 
-  const log = follower?.log;
-
   return (
     <>
       <Stack>
@@ -69,21 +67,21 @@ export default function Index() {
                 <div>
                   <Flex align="center" gap="sm">
                     <Title order={2}>{follower.uniqueId}</Title>
-                    {follower.log?.live === true ? (
+                    {follower.live === true ? (
                       <Badge color="green">Live</Badge>
                     ) : (
                       <Badge color="red">Offline</Badge>
                     )}
                   </Flex>
                   <Text>
-                    {log?._creationTime
-                      ? dayjs().from(dayjs(log?._creationTime), true) + " ago"
+                    {follower?.cronRunAt
+                      ? dayjs().from(dayjs(follower?.cronRunAt), true) + " ago"
                       : null}
                   </Text>
                 </div>
               </Group>
               <Flex justify="flex-end" gap="md">
-                {log?.live && log.roomId ? (
+                {follower?.live ? (
                   <Button
                     color="black"
                     component={Link}

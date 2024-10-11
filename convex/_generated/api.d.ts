@@ -24,7 +24,6 @@ import type * as http from "../http.js";
 import type * as httpActions from "../httpActions.js";
 import type * as log from "../log.js";
 import type * as tables_follower from "../tables/follower.js";
-import type * as tables_log from "../tables/log.js";
 import type * as tables_tiktokUsers from "../tables/tiktokUsers.js";
 import type * as tables_user from "../tables/user.js";
 import type * as tables_video from "../tables/video.js";
@@ -52,7 +51,6 @@ declare const fullApi: ApiFromModules<{
   httpActions: typeof httpActions;
   log: typeof log;
   "tables/follower": typeof tables_follower;
-  "tables/log": typeof tables_log;
   "tables/tiktokUsers": typeof tables_tiktokUsers;
   "tables/user": typeof tables_user;
   "tables/video": typeof tables_video;
