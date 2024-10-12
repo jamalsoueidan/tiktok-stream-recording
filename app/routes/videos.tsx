@@ -21,12 +21,14 @@ import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { FaVideo } from "react-icons/fa";
 import { formatDuration } from "~/lib/formatDuration";
+import { useMobile } from "~/lib/useMobile";
 
 dayjs.extend(localizedFormat);
 
 export default function Index() {
   const inOulet = !!useOutlet();
   const navigate = useNavigate();
+  const isMobile = useMobile();
 
   const { results, status, loadMore } = usePaginatedQuery(
     api.video.paginateVideos,
@@ -98,14 +100,13 @@ export default function Index() {
         </Flex>
       ) : null}
 
-      <Modal.Root opened={inOulet} onClose={() => navigate(-1)}>
-        <Modal.Overlay />
-        <Modal.Content>
-          <Modal.Body style={{ overflow: "hidden" }}>
-            <Outlet />
-          </Modal.Body>
-        </Modal.Content>
-      </Modal.Root>
+      <Modal
+        opened={inOulet}
+        onClose={() => navigate(-1)}
+        fullScreen={isMobile}
+      >
+        <Outlet />
+      </Modal>
     </>
   );
 }

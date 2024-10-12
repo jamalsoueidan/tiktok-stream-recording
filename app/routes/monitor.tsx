@@ -37,7 +37,7 @@ export default function Index() {
     <>
       <Stack align="center" mb="xl">
         <Title>Recordings</Title>
-        <Text>User is not streaming at the moment.</Text>
+        <Text>Your current recordings</Text>
       </Stack>
 
       <>

@@ -106,9 +106,9 @@ export default function Index() {
                     <Title fz="md">{follower.uniqueId}</Title>
                   </Group>
                   <Text fz="xs" c="dimmed">
-                    {follower._creationTime
+                    {follower.cronRunAt
                       ? "updated " +
-                        dayjs().from(dayjs(follower._creationTime), true) +
+                        dayjs().from(dayjs(follower.cronRunAt), true) +
                         " ago"
                       : null}
                   </Text>
