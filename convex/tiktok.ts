@@ -104,13 +104,13 @@ export const getStreamData = action({
 
 export const checkAll = internalAction({
   handler: async (ctx) => {
-    const users = await ctx.runQuery(internal.follower.getAllNotUpdated);
+    const followers = await ctx.runQuery(internal.follower.getAllNotUpdated);
 
-    console.log(`${users.length} users to check is streaming live`);
+    console.log(`${followers.length} followers to check is streaming live`);
 
-    for (const [index, user] of users.entries()) {
+    for (const [index, follower] of followers.entries()) {
       await ctx.scheduler.runAfter(ms(`${index * 20}s`), api.tiktok.checkUser, {
-        uniqueId: user.uniqueId,
+        uniqueId: follower.uniqueId,
       });
     }
   },
