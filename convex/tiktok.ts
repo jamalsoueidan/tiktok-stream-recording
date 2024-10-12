@@ -194,6 +194,8 @@ export const getTiktokMetadata = action({
     const scriptRegex =
       /<script id="SIGI_STATE" type="application\/json">(.+?)<\/script>/;
     const match = textData.match(scriptRegex);
+
+    console.log("Tiktok match", match);
     if (match && match[1]) {
       const metadata = JSON.parse(match[1]) as {
         LiveRoom?: {
@@ -213,6 +215,7 @@ export const getTiktokMetadata = action({
         };
       };
 
+      console.log("Tiktok metadata", metadata);
       const follower = await ctx.runQuery(internal.follower.getByUniqueId, {
         uniqueId: args.uniqueId,
       });
