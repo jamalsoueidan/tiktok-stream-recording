@@ -32,9 +32,12 @@ export const follow = actionWithUser({
       });
     }
 
-    await ctx.scheduler.runAfter(0, api.tiktok.getTiktokMetadata, {
-      uniqueId,
-    });
+    if (!follower?.avatarLarger) {
+      await ctx.scheduler.runAfter(0, api.tiktok.getTiktokMetadata, {
+        uniqueId,
+      });
+    }
+
     await ctx.scheduler.runAfter(0, api.tiktok.checkUser, {
       uniqueId,
     });

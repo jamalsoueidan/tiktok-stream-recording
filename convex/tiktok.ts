@@ -169,6 +169,10 @@ export const checkUser = action({
       console.log(`User ${args.uniqueId}`, "is offline");
     }
 
+    await ctx.scheduler.runAfter(0, api.tiktok.getTiktokMetadata, {
+      uniqueId: follower.uniqueId,
+    });
+
     await ctx.runMutation(internal.follower.update, {
       id: followerId,
       cronRunAt: Date.now(),
