@@ -8,7 +8,6 @@ import {
   Text,
   TextInput,
   Title,
-  UnstyledButton,
 } from "@mantine/core";
 import { Form } from "@remix-run/react";
 import { useState } from "react";
@@ -52,19 +51,12 @@ export function SignIn() {
               <Button type="submit">
                 {step === "signIn" ? "Sign in" : "Register"}
               </Button>
-              <UnstyledButton
-                onClick={() => {
-                  setStep(step === "signIn" ? "signUp" : "signIn");
-                }}
-              >
-                {step === "signIn" ? "Register" : "Go to Login"}
-              </UnstyledButton>
             </Group>
           </Stack>
         </Form>
       </Flex>
       <Flex
-        bg="yellow.1"
+        bg="red.1"
         flex={1}
         h={isMobile ? "50%" : "100%"}
         p="xl"
@@ -72,21 +64,18 @@ export function SignIn() {
         justify="space-between"
       >
         <Flex direction="column">
-          <Title c="orange" fw="600">
+          <Title c="black" fw="600">
             Tiktik Record Stream ●
           </Title>
-          <Text c="orange" fw="500">
-            Automatically record TikTok users streams when they go live.
+          <Text c="black" fw="500">
+            Usage of this app has already cost around 10 USD per day since it
+            launched. Unfortunately, due to these costs, I&apos;m temporarily
+            removing access to the system. If you like the app and would like to
+            continue using it, consider supporting by donating on GitHub. With
+            your support, I’ll provide access again. The platform costs about
+            300 USD per month to maintain, and I’m not covering that alone :)
           </Text>
         </Flex>
-        <Text c="dimmed" size="sm">
-          This app is a fun project I&apos;ve developed, and it&apos;s currently
-          free to use. I&apos;m covering around $100 per month for backend
-          costs, including proxy servers, database, and storage. However, if the
-          costs become too high, I may need to shut down the service. If you
-          find it useful and want to support the project, feel free to donate on
-          GitHub—
-        </Text>
       </Flex>
     </Group>
   );
