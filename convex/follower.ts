@@ -164,24 +164,19 @@ export const getAllNotUpdated = internalQuery({
       .take(20);
 
     const newFollowers = await asyncMap(followers, async (follower) => {
-      const tiktokUser = await getOneFrom(
-        ctx.db,
-        "tiktokUsers",
-        "by_uniqueId",
-        follower.uniqueId,
-        "uniqueId"
-      );
+      const tiktokUser = await ctx.db
+        .query("tiktokUsers")
+        .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
+        .first();
+
       if (!tiktokUser) {
         return null;
       }
 
-      const user = await getOneFrom(
-        ctx.db,
-        "users",
-        "by_id",
-        tiktokUser?.user,
-        "_id"
-      );
+      const user = await ctx.db
+        .query("users")
+        .withIndex("by_id", (q) => q.eq("_id", tiktokUser.user))
+        .first();
 
       if (user?.email === "jamal@soueidan.com") {
         return follower;
