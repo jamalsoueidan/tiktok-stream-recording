@@ -8,7 +8,7 @@ import { Video } from "./tables/video";
 
 export default defineSchema({
   ...authTables,
-  users: User.table,
+  users: User.table.index("by_email", ["email"]),
   followers: Follower.table.index("by_uniqueId", ["uniqueId"]),
   videos: Video.table
     .index("by_uniqueId", ["uniqueId"])

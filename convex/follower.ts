@@ -163,26 +163,28 @@ export const getAllNotUpdated = internalQuery({
       .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 15 * 60000)) // 60000 stands for one minute in milliseconds
       .take(20);
 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", "jamal@soueidan.com"))
+      .first();
+
+    if (!user) {
+      return [];
+    }
+
     const newFollowers = await asyncMap(followers, async (follower) => {
       const tiktokUser = await ctx.db
         .query("tiktokUsers")
-        .withIndex("by_uniqueId", (q) => q.eq("uniqueId", follower.uniqueId))
+        .withIndex("by_user_and_uniqueId", (q) =>
+          q.eq("user", user._id).eq("uniqueId", follower.uniqueId)
+        )
         .first();
 
       if (!tiktokUser) {
         return null;
       }
 
-      const user = await ctx.db
-        .query("users")
-        .withIndex("by_id", (q) => q.eq("_id", tiktokUser.user))
-        .first();
-
-      if (user?.email === "jamal@soueidan.com") {
-        return follower;
-      }
-
-      return null;
+      return follower;
     });
 
     return newFollowers.filter((follower) => follower !== null);

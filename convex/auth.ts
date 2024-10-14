@@ -10,13 +10,7 @@ import { ConvexError } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 
 export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [
-    Password({
-      profile(params) {
-        return { ...params, email: "jamal@soueidan.com" as any };
-      },
-    }),
-  ],
+  providers: [Password],
 });
 
 export const mutationWithUser = customMutation(

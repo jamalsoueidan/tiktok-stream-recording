@@ -121,7 +121,7 @@ export const checkUser = action({
     uniqueId: v.string(),
   },
   handler: async (ctx, args) => {
-    console.log(`Checking user ${args.uniqueId}`);
+    console.log(`Checking tiktok user ${args.uniqueId}`);
     const follower = await ctx.runQuery(internal.follower.getByUniqueId, {
       uniqueId: args.uniqueId,
     });
