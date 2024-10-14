@@ -1,4 +1,4 @@
-import { asyncMap, pick } from "convex-helpers";
+import { pick } from "convex-helpers";
 import { getOneFrom } from "convex-helpers/server/relationships";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
@@ -158,36 +158,10 @@ export const get = query({
 
 export const getAllNotUpdated = internalQuery({
   handler: async (ctx) => {
-    const followers = await ctx.db
+    return await ctx.db
       .query("followers")
       .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 15 * 60000)) // 60000 stands for one minute in milliseconds
       .take(20);
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", "jamal@soueidan.com"))
-      .first();
-
-    if (!user) {
-      return [];
-    }
-
-    const newFollowers = await asyncMap(followers, async (follower) => {
-      const tiktokUser = await ctx.db
-        .query("tiktokUsers")
-        .withIndex("by_user_and_uniqueId", (q) =>
-          q.eq("user", user._id).eq("uniqueId", follower.uniqueId)
-        )
-        .first();
-
-      if (!tiktokUser) {
-        return null;
-      }
-
-      return follower;
-    });
-
-    return newFollowers.filter((follower) => follower !== null);
   },
 });
 

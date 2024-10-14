@@ -9,4 +9,5 @@ export const User = Table("users", {
   phone: v.optional(v.string()),
   phoneVerificationTime: v.optional(v.number()),
   loggedInDate: v.optional(v.number()),
+  isAdmin: v.optional(v.boolean()),
 });

@@ -133,6 +133,24 @@ export const checkUser = action({
 
     const followerId = follower._id;
 
+    const isPaidUser = await ctx.runQuery(
+      internal.tiktokUsers.checkIfUserPaidUser,
+      {
+        uniqueId: args.uniqueId,
+      }
+    );
+
+    if (!isPaidUser) {
+      await ctx.runMutation(internal.follower.update, {
+        id: followerId,
+        cronRunAt: Date.now(),
+        live: false,
+      });
+
+      console.log(`User ${args.uniqueId} is not a paid user`);
+      return;
+    }
+
     const roomId = await ctx.runAction(internal.tiktok.getRoomId, {
       uniqueId: args.uniqueId,
     });
