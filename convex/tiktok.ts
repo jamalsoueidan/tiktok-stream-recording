@@ -122,7 +122,7 @@ export const checkUser = action({
     uniqueId: v.string(),
   },
   handler: async (ctx, args) => {
-    console.log(process.env.MODE, `Checking tiktok user ${args.uniqueId}`);
+    console.log(process.env.ENV, `Checking tiktok user ${args.uniqueId}`);
     const follower = await ctx.runQuery(internal.follower.getByUniqueId, {
       uniqueId: args.uniqueId,
     });
@@ -141,7 +141,7 @@ export const checkUser = action({
       }
     );
 
-    if (!isPaidUser || process.env.MODE !== "production") {
+    if (!isPaidUser || process.env.ENV !== "production") {
       await ctx.runMutation(internal.follower.update, {
         id: followerId,
         cronRunAt: Date.now(),
