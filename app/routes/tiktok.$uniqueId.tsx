@@ -25,11 +25,14 @@ import {
 import { api } from "convex/_generated/api";
 import { useAction, usePaginatedQuery, useQuery } from "convex/react";
 import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useState } from "react";
 import { FaRegCircle, FaStackExchange, FaTiktok } from "react-icons/fa";
+import { formatDuration } from "~/lib/formatDuration";
 
 dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 export default function Index() {
   const inOulet = !!useOutlet();
@@ -134,6 +137,7 @@ export default function Index() {
                     key={video._id}
                     component={Link}
                     to={`/tiktok/${video.uniqueId}/watch/${video._id}`}
+                    pos="relative"
                   >
                     <Image
                       radius="md"
@@ -142,6 +146,24 @@ export default function Index() {
                       fit="contain"
                       src={video.image}
                     />
+
+                    {video.durationSec ? (
+                      <>
+                        <Badge
+                          pos="absolute"
+                          bottom="26px"
+                          right="4px"
+                          color="black"
+                        >
+                          <Text fz="sm">
+                            {formatDuration(video.durationSec)}
+                          </Text>
+                        </Badge>
+                      </>
+                    ) : null}
+                    <Text c="dimmed" fz="sm">
+                      {dayjs(video._creationTime).format(`LLL`)}
+                    </Text>
                   </Paper>
                 </Grid.Col>
               ))}

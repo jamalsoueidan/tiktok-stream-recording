@@ -122,7 +122,7 @@ export const checkUser = action({
     uniqueId: v.string(),
   },
   handler: async (ctx, args) => {
-    console.log(process.env.ENV, `Checking tiktok user ${args.uniqueId}`);
+    console.log(`Checking tiktok user ${args.uniqueId}`);
     const follower = await ctx.runQuery(internal.follower.getByUniqueId, {
       uniqueId: args.uniqueId,
     });
@@ -182,7 +182,7 @@ export const checkUser = action({
         requireLogin = true;
       } else {
         console.log("Lets trigger start recording for", args.uniqueId);
-        await ctx.scheduler.runAfter(0, api.azure.startRecording, args);
+        await ctx.scheduler.runAfter(0, internal.azure.startRecording, args);
       }
     } else {
       console.log(`User ${args.uniqueId}`, "is offline");

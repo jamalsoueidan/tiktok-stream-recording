@@ -72,7 +72,7 @@ export const saveVideo = httpAction(async (ctx, request) => {
   });
 
   //terminate container after 10min
-  await ctx.scheduler.runAfter(ms("10m"), api.azure.terminateContainer, {
+  await ctx.scheduler.runAfter(ms("10m"), internal.azure.terminateContainer, {
     uniqueId,
   });
 

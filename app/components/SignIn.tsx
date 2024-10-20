@@ -15,7 +15,7 @@ import { useMobile } from "~/lib/useMobile";
 
 export function SignIn() {
   const { signIn } = useAuthActions();
-  const [step, setStep] = useState<"signUp" | "signIn">("signIn");
+  const [step] = useState<"signUp" | "signIn">("signIn");
   const isMobile = useMobile();
 
   return (

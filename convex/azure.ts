@@ -9,8 +9,8 @@ import {
 } from "@azure/storage-blob";
 import { pick } from "convex-helpers";
 import { v } from "convex/values";
-import { api, internal } from "./_generated/api";
-import { action } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { action, internalAction } from "./_generated/server";
 import { Follower } from "./tables/follower";
 import { Video } from "./tables/video";
 
@@ -43,7 +43,7 @@ function createClient() {
   );
 }
 
-export const startRecording = action({
+export const startRecording = internalAction({
   args: pick(Follower.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     if (!process.env.RESOURCE_GROUP) {
@@ -53,7 +53,7 @@ export const startRecording = action({
     const client = createClient();
     const containerName = cleanContainerName(args.uniqueId);
 
-    const status = await ctx.runAction(api.azure.getContainerStatus, args);
+    const status = await ctx.runAction(internal.azure.getContainerStatus, args);
 
     if (status === "Running") {
       console.log(
@@ -129,7 +129,7 @@ export const startRecording = action({
   },
 });
 
-export const terminateContainer = action({
+export const terminateContainer = internalAction({
   args: {
     ...pick(Video.withoutSystemFields, ["uniqueId"]),
   },
@@ -139,7 +139,7 @@ export const terminateContainer = action({
     }
 
     const client = createClient();
-    const status = await ctx.runAction(api.azure.getContainerStatus, args);
+    const status = await ctx.runAction(internal.azure.getContainerStatus, args);
 
     if (status === "Running") {
       console.log("Container is running. Cannot terminate.", args.uniqueId);
@@ -156,7 +156,7 @@ export const terminateContainer = action({
   },
 });
 
-export const getContainerStatus = action({
+export const getContainerStatus = internalAction({
   args: pick(Video.withoutSystemFields, ["uniqueId"]),
   handler: async (ctx, args) => {
     if (!process.env.RESOURCE_GROUP) {
