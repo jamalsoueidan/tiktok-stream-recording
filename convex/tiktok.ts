@@ -106,13 +106,14 @@ export const checkAll = internalAction({
   handler: async (ctx) => {
     const followers = await ctx.runQuery(internal.follower.getAllNotUpdated);
 
-    console.log(`${followers.length} followers to check is streaming live`);
-
+    const users: string[] = [];
     for (const [index, follower] of followers.entries()) {
-      await ctx.scheduler.runAfter(ms(`${index * 20}s`), api.tiktok.checkUser, {
+      await ctx.scheduler.runAfter(ms(`${index * 2}s`), api.tiktok.checkUser, {
         uniqueId: follower.uniqueId,
       });
+      users.push(follower.uniqueId);
     }
+    console.log(`${followers.length} users to check: ${users.join(", ")}`);
   },
 });
 
@@ -140,7 +141,7 @@ export const checkUser = action({
       }
     );
 
-    if (!isPaidUser) {
+    if (!isPaidUser || process.env.NODE_ENV !== "production") {
       await ctx.runMutation(internal.follower.update, {
         id: followerId,
         cronRunAt: Date.now(),
