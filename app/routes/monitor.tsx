@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -14,13 +15,14 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { Link, Outlet, useNavigate, useOutlet } from "@remix-run/react";
-
 import { api } from "convex/_generated/api";
 import { usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FaRecordVinyl } from "react-icons/fa";
 
+dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
 
 export default function Index() {
@@ -71,7 +73,23 @@ export default function Index() {
                       <FaRecordVinyl style={{ width: "80%", height: "80%" }} />
                     </ThemeIcon>
                   </Box>
-                  <Title order={3}>{video.uniqueId}</Title>
+                  <UnstyledButton
+                    component={Link}
+                    to={`/tiktok/${video.uniqueId}`}
+                  >
+                    <Flex align="center" mt={rem(4)} gap="xs">
+                      <Avatar
+                        src={video.follower?.avatarMedium}
+                        radius="xl"
+                        size="md"
+                      />
+                      <Title fz="lg">{video.uniqueId}</Title>
+                    </Flex>
+
+                    <Text c="dimmed" fz="sm">
+                      {dayjs(video._creationTime).format(`LLL`)}
+                    </Text>
+                  </UnstyledButton>
                 </UnstyledButton>
               </Card>
             </Grid.Col>

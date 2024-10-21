@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Badge,
   Box,
   Button,
@@ -12,6 +13,7 @@ import {
   Text,
   ThemeIcon,
   Title,
+  UnstyledButton,
 } from "@mantine/core";
 import { Link, Outlet, useNavigate, useOutlet } from "@remix-run/react";
 
@@ -46,14 +48,8 @@ export default function Index() {
       <Grid>
         {results?.map((video) => (
           <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
-            <Card
-              withBorder
-              shadow="md"
-              p="xs"
-              component={Link}
-              to={`/videos/${video._id}`}
-            >
-              <Box pos="relative">
+            <Card withBorder shadow="md" p="xs">
+              <Box pos="relative" component={Link} to={`/videos/${video._id}`}>
                 <Image
                   src={video.image}
                   radius="md"
@@ -81,13 +77,20 @@ export default function Index() {
                 ) : null}
               </Box>
 
-              <Flex justify="space-between" align="center" mt={rem(4)}>
-                <Title fz="lg">{video.uniqueId}</Title>
-              </Flex>
+              <UnstyledButton component={Link} to={`/tiktok/${video.uniqueId}`}>
+                <Flex align="center" mt={rem(4)} gap="xs">
+                  <Avatar
+                    src={video.follower?.avatarMedium}
+                    radius="xl"
+                    size="md"
+                  />
+                  <Title fz="lg">{video.uniqueId}</Title>
+                </Flex>
 
-              <Text c="dimmed" fz="sm">
-                {dayjs(video._creationTime).format(`LLL`)}
-              </Text>
+                <Text c="dimmed" fz="sm">
+                  {dayjs(video._creationTime).format(`LLL`)}
+                </Text>
+              </UnstyledButton>
             </Card>
           </Grid.Col>
         ))}

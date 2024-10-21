@@ -1,9 +1,9 @@
-import { pick } from "convex-helpers";
+import { asyncMap, pick } from "convex-helpers";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalMutation, internalQuery, query } from "./_generated/server";
 import { queryWithUser } from "./auth";
 import { Video } from "./tables/video";
 
@@ -57,16 +57,26 @@ export const paginateRecording = queryWithUser({
       .order("desc")
       .paginate(args.paginationOpts);
 
-    const page = await Promise.all(
-      paginate.page
-        .filter((video) => uniqueIds.includes(video.uniqueId))
-        .map(async (video) => {
-          if (video.image) {
-            return { ...video, image: await ctx.storage.getUrl(video.image) };
-          }
-          return video;
-        })
+    const pageFilters = paginate.page.filter((video) =>
+      uniqueIds.includes(video.uniqueId)
     );
+
+    const page = await asyncMap(pageFilters, async (video) => {
+      const follower = await ctx.db
+        .query("followers")
+        .withIndex("by_uniqueId", (q) => q.eq("uniqueId", video.uniqueId))
+        .first();
+
+      if (video.image) {
+        return {
+          ...video,
+          image: await ctx.storage.getUrl(video.image),
+          follower,
+        };
+      }
+
+      return { ...video, follower };
+    });
 
     return {
       ...paginate,
@@ -84,14 +94,22 @@ export const paginateVideos = queryWithUser({
       .order("desc")
       .paginate(args.paginationOpts);
 
-    const page = await Promise.all(
-      paginate.page.map(async (video) => {
-        if (video.image) {
-          return { ...video, image: await ctx.storage.getUrl(video.image) };
-        }
-        return video;
-      })
-    );
+    const page = await asyncMap(paginate.page, async (video) => {
+      const follower = await ctx.db
+        .query("followers")
+        .withIndex("by_uniqueId", (q) => q.eq("uniqueId", video.uniqueId))
+        .first();
+
+      if (video.image) {
+        return {
+          ...video,
+          image: await ctx.storage.getUrl(video.image),
+          follower,
+        };
+      }
+
+      return { ...video, follower };
+    });
 
     return {
       ...paginate,
@@ -100,7 +118,7 @@ export const paginateVideos = queryWithUser({
   },
 });
 
-export const paginateUserVideos = queryWithUser({
+export const paginateUserVideos = query({
   args: {
     paginationOpts: paginationOptsValidator,
     ...pick(Video.withoutSystemFields, ["uniqueId"]),
