@@ -22,7 +22,6 @@ import type * as crons from "../crons.js";
 import type * as follower from "../follower.js";
 import type * as http from "../http.js";
 import type * as httpActions from "../httpActions.js";
-import type * as log from "../log.js";
 import type * as tables_follower from "../tables/follower.js";
 import type * as tables_tiktokUsers from "../tables/tiktokUsers.js";
 import type * as tables_user from "../tables/user.js";
@@ -49,7 +48,6 @@ declare const fullApi: ApiFromModules<{
   follower: typeof follower;
   http: typeof http;
   httpActions: typeof httpActions;
-  log: typeof log;
   "tables/follower": typeof tables_follower;
   "tables/tiktokUsers": typeof tables_tiktokUsers;
   "tables/user": typeof tables_user;

@@ -180,3 +180,71 @@ export const update = internalMutation({
     return convexToJson.db.patch(id, rest);
   },
 });
+
+export const stats = query({
+  args: pick(Video.withoutSystemFields, ["uniqueId"]),
+  handler: async (ctx, args) => {
+    const videos = await ctx.db
+      .query("videos")
+      .withIndex("by_uniqueId", (q) => q.eq("uniqueId", args.uniqueId))
+      .collect();
+
+    const intervals = generateTimeIntervals();
+    const intervalStats = intervals.map(() => 0);
+
+    videos.forEach((video) => {
+      if (video?.durationSec) {
+        const startTime = new Date(video._creationTime);
+        const endTime = new Date(
+          startTime.getTime() + video?.durationSec * 1000
+        );
+
+        intervals.forEach((interval, index) => {
+          const [hour, minute] = interval.split(":");
+          const intervalStart = new Date(startTime);
+          intervalStart.setHours(parseInt(hour), parseInt(minute), 0, 0);
+
+          const intervalEnd = new Date(intervalStart);
+          intervalEnd.setMinutes(intervalEnd.getMinutes() + 30); // 30-minute intervals
+
+          // Check if the video crosses this interval
+          if (
+            doesVideoCrossInterval(
+              startTime,
+              endTime,
+              intervalStart,
+              intervalEnd
+            )
+          ) {
+            intervalStats[index] += 1;
+          }
+        });
+      }
+    });
+
+    const result = intervals.map((interval, index) => ({
+      text: interval,
+      value: intervalStats[index],
+    }));
+
+    return result;
+  },
+});
+
+const generateTimeIntervals = () => {
+  const intervals = [];
+  for (let hour = 0; hour < 24; hour++) {
+    intervals.push(`${String(hour).padStart(2, "0")}:00`);
+    intervals.push(`${String(hour).padStart(2, "0")}:30`);
+  }
+  return intervals;
+};
+
+const doesVideoCrossInterval = (
+  startTime: Date,
+  endTime: Date,
+  intervalStart: Date,
+  intervalEnd: Date
+) => {
+  return startTime < intervalEnd && endTime > intervalStart;
+};

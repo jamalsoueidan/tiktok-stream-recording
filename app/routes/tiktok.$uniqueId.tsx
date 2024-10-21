@@ -30,12 +30,14 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useState } from "react";
 import { FaRegCircle, FaStackExchange, FaTiktok } from "react-icons/fa";
 import { formatDuration } from "~/lib/formatDuration";
+import { useMobile } from "~/lib/useMobile";
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
 export default function Index() {
   const inOulet = !!useOutlet();
+  const isMobile = useMobile();
   const navigate = useNavigate();
   const params = useParams();
   const follower = useQuery(api.follower.get, {
@@ -174,7 +176,12 @@ export default function Index() {
           </>
         )}
       </Stack>
-      <Modal.Root opened={inOulet} onClose={() => navigate(-1)}>
+      <Modal.Root
+        opened={inOulet}
+        onClose={() => navigate(-1)}
+        size="xl"
+        fullScreen={isMobile}
+      >
         <Modal.Overlay />
         <Modal.Content>
           <Modal.Body style={{ overflow: "hidden" }}>
