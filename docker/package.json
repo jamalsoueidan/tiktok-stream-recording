@@ -9,8 +9,8 @@
     "docker:build": "docker build -t tiktok .",
     "docker:run": "docker run -it --rm --env-file ../.env.local tiktok",
     "docker:test": "npm run docker:build && npm run docker:run",
-    "docker:tag": "docker tag tiktok convextiktok.azurecr.io/tiktok:v15",
-    "docker:push": "docker push convextiktok.azurecr.io/tiktok:v15",
+    "docker:tag": "docker tag tiktok convextiktok.azurecr.io/tiktok:v16",
+    "docker:push": "docker push convextiktok.azurecr.io/tiktok:v16",
     "docker:deploy": "npm run docker:build && npm run docker:tag && npm run docker:push"
   },
   "author": "Jamal Soueidan",

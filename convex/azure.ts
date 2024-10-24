@@ -9,6 +9,7 @@ import {
 } from "@azure/storage-blob";
 import { pick } from "convex-helpers";
 import { v } from "convex/values";
+import ms from "ms";
 import { internal } from "./_generated/api";
 import { action, internalAction } from "./_generated/server";
 import { Follower } from "./tables/follower";
@@ -78,7 +79,7 @@ export const startRecording = internalAction({
         containers: [
           {
             name: containerName,
-            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v15`,
+            image: `${process.env.CONTAINER_REGISTRY_NAME}.azurecr.io/${process.env.IMAGE_NAME}:v16`,
             resources: {
               requests: {
                 cpu: 1,
@@ -125,6 +126,12 @@ export const startRecording = internalAction({
       }
     );
 
+    // this would enforce to maximum record for one hour, if still recording, it will just start again.
+    await ctx.scheduler.runAfter(ms("1h"), internal.azure.terminateContainer, {
+      uniqueId: args.uniqueId,
+      force: true,
+    });
+
     return { status: "Container started successfully" };
   },
 });
@@ -132,6 +139,7 @@ export const startRecording = internalAction({
 export const terminateContainer = internalAction({
   args: {
     ...pick(Video.withoutSystemFields, ["uniqueId"]),
+    force: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     if (!process.env.RESOURCE_GROUP) {
@@ -141,7 +149,7 @@ export const terminateContainer = internalAction({
     const client = createClient();
     const status = await ctx.runAction(internal.azure.getContainerStatus, args);
 
-    if (status === "Running") {
+    if (status === "Running" && !args.force) {
       console.log("Container is running. Cannot terminate.", args.uniqueId);
       return { status: "Container is running. Cannot terminate" };
     }
