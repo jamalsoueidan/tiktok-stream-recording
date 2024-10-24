@@ -146,10 +146,11 @@ export const terminateContainer = internalAction({
       throw new Error("Missing SUBSCRIPTION_ID env value");
     }
 
+    const { force, ...rest } = args;
     const client = createClient();
-    const status = await ctx.runAction(internal.azure.getContainerStatus, args);
+    const status = await ctx.runAction(internal.azure.getContainerStatus, rest);
 
-    if (status === "Running" && !args.force) {
+    if (status === "Running" && !force) {
       console.log("Container is running. Cannot terminate.", args.uniqueId);
       return { status: "Container is running. Cannot terminate" };
     }
