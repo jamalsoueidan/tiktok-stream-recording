@@ -74,7 +74,6 @@ export const saveVideo = httpAction(async (ctx, request) => {
   //terminate container after 10min
   await ctx.scheduler.runAfter(ms("10m"), internal.azure.terminateContainer, {
     uniqueId,
-    force: false,
   });
 
   //check user if he came back after 1m, sometime disconnection happens in tiktok live
