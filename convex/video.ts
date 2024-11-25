@@ -2,6 +2,7 @@ import { asyncMap, pick } from "convex-helpers";
 import { partial } from "convex-helpers/validators";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+
 import { api } from "./_generated/api";
 import { internalMutation, internalQuery, query } from "./_generated/server";
 import { queryWithUser } from "./auth";
@@ -118,7 +119,7 @@ export const paginateVideos = queryWithUser({
   },
 });
 
-export const paginateUserVideos = query({
+export const paginateUserVideos = queryWithUser({
   args: {
     paginationOpts: paginationOptsValidator,
     ...pick(Video.withoutSystemFields, ["uniqueId"]),
