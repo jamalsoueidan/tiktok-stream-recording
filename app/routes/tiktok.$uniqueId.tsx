@@ -23,7 +23,12 @@ import {
 } from "@remix-run/react";
 
 import { api } from "convex/_generated/api";
-import { useAction, usePaginatedQuery, useQuery } from "convex/react";
+import {
+  useAction,
+  useMutation,
+  usePaginatedQuery,
+  useQuery,
+} from "convex/react";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -44,6 +49,7 @@ export default function Index() {
     uniqueId: params.uniqueId || "",
   });
 
+  const unfollow = useMutation(api.follower.unfollow);
   const { results, status, loadMore } = usePaginatedQuery(
     api.video.paginateUserVideos,
     { uniqueId: params.uniqueId || "" },
@@ -118,6 +124,25 @@ export default function Index() {
                   leftSection={<FaRegCircle />}
                 >
                   Refresh
+                </Button>
+                <Button
+                  color="red"
+                  onClick={() =>
+                    unfollow({
+                      uniqueId: follower.uniqueId,
+                    })
+                  }
+                >
+                  Unfollow
+                </Button>
+                <Button
+                  component={Link}
+                  to={`https://www.tiktok.com/@${follower.uniqueId}`}
+                  target="_blank"
+                  color="black"
+                  leftSection={<FaTiktok />}
+                >
+                  Tiktok
                 </Button>
               </Flex>
             </Flex>

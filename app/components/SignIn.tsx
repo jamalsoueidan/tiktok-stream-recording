@@ -10,6 +10,8 @@ import {
   Title,
 } from "@mantine/core";
 import { Form } from "@remix-run/react";
+import { api } from "convex/_generated/api";
+import { useQuery } from "convex/react";
 import { useState } from "react";
 import { useMobile } from "~/lib/useMobile";
 
@@ -17,6 +19,7 @@ export function SignIn() {
   const { signIn } = useAuthActions();
   const [step] = useState<"signUp" | "signIn">("signIn");
   const isMobile = useMobile();
+  const videos = useQuery(api.video.lastVideos);
 
   return (
     <Group h="100vh" gap="0">
@@ -68,12 +71,10 @@ export function SignIn() {
             Tiktik Record Stream ●
           </Title>
           <Text c="black" fw="500">
-            Usage of this app has already cost around 10 USD per day since it
-            launched. Unfortunately, due to these costs, I&apos;m temporarily
-            removing access to the system. If you like the app and would like to
-            continue using it, consider supporting by donating on GitHub. With
-            your support, I’ll provide access again. The platform costs about
-            300 USD per month to maintain, and I’m not covering that alone :)
+            This app allows users to follow TikTok users and automatically
+            records any live streams whenever they go live. Users will never
+            miss another stream as the recordings are stored and made accessible
+            within the app.
           </Text>
         </Flex>
       </Flex>

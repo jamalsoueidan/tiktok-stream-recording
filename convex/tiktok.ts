@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import ms from "ms";
 import { api, internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 import { action, internalAction } from "./_generated/server";
 
 // Define types
@@ -134,7 +135,7 @@ export const checkUser = action({
 
     const followerId = follower._id;
 
-    const isPaidUser = await ctx.runQuery(
+    /*const isPaidUser = await ctx.runQuery(
       internal.tiktokUsers.checkIfUserPaidUser,
       {
         uniqueId: args.uniqueId,
@@ -150,7 +151,7 @@ export const checkUser = action({
 
       console.log(`User ${args.uniqueId} is not a paid user`);
       return;
-    }
+    }*/
 
     const roomId = await ctx.runAction(internal.tiktok.getRoomId, {
       uniqueId: args.uniqueId,
@@ -238,9 +239,16 @@ export const getTiktokMetadata = action({
         uniqueId: args.uniqueId,
       });
 
-      if (follower) {
+      if (follower && !follower.storageId) {
+        const response = await fetch(
+          metadata.LiveRoom?.liveRoomUserInfo?.user?.avatarLarger || ""
+        );
+        const image = await response.blob();
+        const storageId: Id<"_storage"> = await ctx.storage.store(image);
+
         await ctx.runMutation(internal.follower.update, {
           id: follower._id,
+          storageId,
           avatarMedium: metadata.LiveRoom?.liveRoomUserInfo?.user?.avatarMedium,
           avatarLarger: metadata.LiveRoom?.liveRoomUserInfo?.user?.avatarLarger,
           signature: metadata.LiveRoom?.liveRoomUserInfo?.user?.signature,

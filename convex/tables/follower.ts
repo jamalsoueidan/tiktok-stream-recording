@@ -6,6 +6,7 @@ export const Follower = Table("followers", {
   cronRunAt: v.number(),
   avatarMedium: v.optional(v.string()),
   avatarLarger: v.optional(v.string()),
+  storageId: v.optional(v.id("_storage")),
   nickname: v.optional(v.string()),
   signature: v.optional(v.string()),
   requireLogin: v.optional(v.boolean()),

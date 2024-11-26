@@ -1,4 +1,5 @@
 import {
+  AspectRatio,
   Badge,
   Box,
   Button,
@@ -74,14 +75,15 @@ export default function Index() {
                 to={`/tiktok/${follower.uniqueId}`}
               >
                 <Box pos="relative">
-                  <Image
-                    src={follower.avatarMedium}
-                    fallbackSrc="https://placehold.co/400x400?text=Require login"
-                    radius="md"
-                    w="100%"
-                    h="auto"
-                    fit="contain"
-                  />
+                  <AspectRatio ratio={1}>
+                    <Image
+                      src={follower.url}
+                      fallbackSrc={`https://placehold.co/400x400?text=${follower.uniqueId}`}
+                      radius="md"
+                      fit="cover"
+                      alt="Video thumbnail"
+                    />
+                  </AspectRatio>
                   <Flex
                     pos="absolute"
                     top={rem(4)}
@@ -134,7 +136,7 @@ export default function Index() {
                   leftSection={<FaTiktok />}
                   size="compact-xs"
                 >
-                  Go
+                  Tiktok
                 </Button>
               </Flex>
             </Card>

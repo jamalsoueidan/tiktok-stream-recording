@@ -120,7 +120,13 @@ export const paginate = queryWithUser({
           .order("desc")
           .first();
 
-        return { ...follower, recording: video ? true : false };
+        return {
+          ...follower,
+          recording: video ? true : false,
+          ...(follower.storageId
+            ? { url: await ctx.storage.getUrl(follower.storageId) }
+            : {}),
+        };
       })
     );
 

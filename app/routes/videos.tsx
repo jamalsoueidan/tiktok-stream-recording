@@ -1,4 +1,5 @@
 import {
+  AspectRatio,
   Avatar,
   Badge,
   Box,
@@ -35,7 +36,7 @@ export default function Index() {
   const { results, status, loadMore } = usePaginatedQuery(
     api.video.paginateVideos,
     {},
-    { initialNumItems: 30 }
+    { initialNumItems: 15 }
   );
 
   return (
@@ -50,13 +51,14 @@ export default function Index() {
           <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
             <Card withBorder shadow="md" p="xs">
               <Box pos="relative" component={Link} to={`/videos/${video._id}`}>
-                <Image
-                  src={video.image}
-                  radius="md"
-                  w="100%"
-                  mah={rem(250)}
-                  fit="contain"
-                />
+                <AspectRatio ratio={1}>
+                  <Image
+                    src={video.image}
+                    radius="md"
+                    fit="cover"
+                    alt="Video thumbnail"
+                  />
+                </AspectRatio>
                 <ThemeIcon
                   size={rem(90)}
                   color="transparent"
@@ -79,11 +81,7 @@ export default function Index() {
 
               <UnstyledButton component={Link} to={`/tiktok/${video.uniqueId}`}>
                 <Flex align="center" mt={rem(4)} gap="xs">
-                  <Avatar
-                    src={video.follower?.avatarMedium}
-                    radius="xl"
-                    size="md"
-                  />
+                  <Avatar src={video.follower?.url} radius="xl" size="md" />
                   <Title fz="lg">{video.uniqueId}</Title>
                 </Flex>
 

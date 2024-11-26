@@ -86,6 +86,10 @@ export const paginateRecording = queryWithUser({
   },
 });
 
+export const lastVideos = query((ctx) => {
+  return ctx.db.query("videos").order("desc").take(10);
+});
+
 export const paginateVideos = queryWithUser({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
@@ -101,15 +105,18 @@ export const paginateVideos = queryWithUser({
         .withIndex("by_uniqueId", (q) => q.eq("uniqueId", video.uniqueId))
         .first();
 
-      if (video.image) {
-        return {
-          ...video,
-          image: await ctx.storage.getUrl(video.image),
-          follower,
-        };
-      }
-
-      return { ...video, follower };
+      return {
+        ...video,
+        ...(video.image
+          ? { image: await ctx.storage.getUrl(video.image) }
+          : {}),
+        follower: {
+          ...follower,
+          ...(follower && follower.storageId
+            ? { url: await ctx.storage.getUrl(follower.storageId) }
+            : {}),
+        },
+      };
     });
 
     return {
