@@ -114,6 +114,7 @@ export const checkAll = internalAction({
       });
       users.push(follower.uniqueId);
     }
+
     console.log(`${followers.length} users to check: ${users.join(", ")}`);
   },
 });

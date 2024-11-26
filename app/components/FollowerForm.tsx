@@ -1,4 +1,4 @@
-import { Button, TextInput } from "@mantine/core";
+import { Button, Group, TextInput } from "@mantine/core";
 import { useNavigate } from "@remix-run/react";
 import { api } from "convex/_generated/api";
 import { useAction } from "convex/react";
@@ -12,7 +12,7 @@ export const FollowerForm = () => {
   const addFollower = useAction(api.follower.follow);
 
   return (
-    <>
+    <Group my="sm">
       <TextInput
         placeholder="Enter tiktok user @neymarjr"
         value={uniqueId}
@@ -31,6 +31,6 @@ export const FollowerForm = () => {
       >
         Add follower
       </Button>
-    </>
+    </Group>
   );
 };

@@ -25,6 +25,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect } from "react";
 import { FaTiktok } from "react-icons/fa";
+import { FollowerForm } from "~/components/FollowerForm";
 
 dayjs.extend(relativeTime);
 
@@ -61,16 +62,26 @@ export default function Index() {
   }, [inViewport, loadMore, status]);
 
   return !results.length ? (
-    <Stack justify="center">
-      <Title>No followers added yet!</Title>
-      <Text>
-        To get started, add the TikTok users whose live streams you want to
-        record. When they go live, we will automatically start recording for
-        you.
-      </Text>
-    </Stack>
+    <>
+      <Stack justify="center">
+        <Title>No followers added yet!</Title>
+        <Text>
+          To get started, add the TikTok users whose live streams you want to
+          record. When they go live, we will automatically start recording for
+          you.
+        </Text>
+      </Stack>
+
+      <FollowerForm />
+    </>
   ) : (
     <>
+      <FollowerForm />
+      <Stack align="center" mb="xl">
+        <Title>Followers</Title>
+        <Text>Your followers</Text>
+      </Stack>
+
       <Grid gutter="xs">
         {results?.map((follower) => (
           <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={follower._id}>

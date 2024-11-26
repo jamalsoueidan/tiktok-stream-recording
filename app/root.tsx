@@ -2,7 +2,12 @@ import "@mantine/charts/styles.css";
 import "@mantine/core/styles.css";
 
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { ColorSchemeScript, Container, MantineProvider } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  Container,
+  Flex,
+  MantineProvider,
+} from "@mantine/core";
 import {
   Links,
   Meta,
@@ -18,7 +23,7 @@ import {
   Unauthenticated,
 } from "convex/react";
 import { useState } from "react";
-import { Navigation } from "./components/Navigation";
+import { LeftNavigation } from "./components/LeftNavigation";
 import { SignIn } from "./components/SignIn";
 
 export async function loader() {
@@ -44,10 +49,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <MantineProvider>
           <ConvexAuthProvider client={convex}>
             <Authenticated>
-              <Container fluid p="md">
-                <Navigation />
-                {children}
-              </Container>
+              <Flex>
+                <LeftNavigation />
+                <Container fluid>{children}</Container>
+              </Flex>
             </Authenticated>
             <Unauthenticated>
               <SignIn />

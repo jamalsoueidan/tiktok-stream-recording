@@ -166,8 +166,10 @@ export const getAllNotUpdated = internalQuery({
   handler: async (ctx) => {
     return await ctx.db
       .query("followers")
-      .filter((q) => q.lte(q.field("cronRunAt"), Date.now() - 15 * 60000)) // 60000 stands for one minute in milliseconds
-      .take(150);
+      .withIndex("by_cronRunAt", (q) =>
+        q.lte("cronRunAt", Date.now() - 15 * 60000)
+      ) // 60000 stands for one minute in milliseconds
+      .take(25);
   },
 });
 

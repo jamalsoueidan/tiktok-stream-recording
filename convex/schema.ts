@@ -9,7 +9,9 @@ import { Video } from "./tables/video";
 export default defineSchema({
   ...authTables,
   users: User.table.index("by_email", ["email"]),
-  followers: Follower.table.index("by_uniqueId", ["uniqueId"]),
+  followers: Follower.table
+    .index("by_uniqueId", ["uniqueId"])
+    .index("by_cronRunAt", ["cronRunAt"]),
   videos: Video.table
     .index("by_uniqueId", ["uniqueId"])
     .index("by_filename", ["filename"])

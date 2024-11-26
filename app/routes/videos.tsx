@@ -24,10 +24,9 @@ import { usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { useEffect } from "react";
-import { FaVideo } from "react-icons/fa";
+import { CiPlay1 } from "react-icons/ci";
 import { formatDuration } from "~/lib/formatDuration";
 import { useMobile } from "~/lib/useMobile";
-
 dayjs.extend(localizedFormat);
 
 export default function Index() {
@@ -58,7 +57,7 @@ export default function Index() {
 
       <Grid>
         {results?.map((video) => (
-          <Grid.Col span={{ base: 6, sm: 3, md: 2 }} key={video._id}>
+          <Grid.Col span={{ base: 6, sm: 3 }} key={video._id}>
             <Card withBorder shadow="md" p="xs">
               <Box pos="relative" component={Link} to={`/videos/${video._id}`}>
                 <AspectRatio ratio={1}>
@@ -80,7 +79,7 @@ export default function Index() {
                     opacity: 0.5,
                   }}
                 >
-                  <FaVideo style={{ width: "80%", height: "80%" }} />
+                  <CiPlay1 style={{ width: "80%", height: "80%" }} />
                 </ThemeIcon>
                 {video.durationSec ? (
                   <Badge pos="absolute" bottom="0" right="0" color="black">
@@ -105,7 +104,7 @@ export default function Index() {
       </Grid>
 
       <Flex mt="md" ref={ref}>
-        {status === "LoadingMore" ? <Loader /> : null}
+        {status === "LoadingMore" ? <Loader size={50} /> : null}
       </Flex>
 
       <Modal
