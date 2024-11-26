@@ -3,11 +3,11 @@ import {
   Avatar,
   Badge,
   Box,
-  Button,
   Card,
   Flex,
   Grid,
   Image,
+  Loader,
   Modal,
   rem,
   Stack,
@@ -16,12 +16,14 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
+import { useInViewport } from "@mantine/hooks";
 import { Link, Outlet, useNavigate, useOutlet } from "@remix-run/react";
 
 import { api } from "convex/_generated/api";
 import { usePaginatedQuery } from "convex/react";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import { useEffect } from "react";
 import { FaVideo } from "react-icons/fa";
 import { formatDuration } from "~/lib/formatDuration";
 import { useMobile } from "~/lib/useMobile";
@@ -38,6 +40,14 @@ export default function Index() {
     {},
     { initialNumItems: 15 }
   );
+
+  const { ref, inViewport } = useInViewport();
+
+  useEffect(() => {
+    if (inViewport && status === "CanLoadMore") {
+      loadMore(10);
+    }
+  }, [inViewport, loadMore, status]);
 
   return (
     <>
@@ -93,13 +103,10 @@ export default function Index() {
           </Grid.Col>
         ))}
       </Grid>
-      {status === "CanLoadMore" ? (
-        <Flex mt="md">
-          <Button onClick={() => loadMore(10)} fullWidth>
-            Load More
-          </Button>
-        </Flex>
-      ) : null}
+
+      <Flex mt="md" ref={ref}>
+        {status === "LoadingMore" ? <Loader /> : null}
+      </Flex>
 
       <Modal
         opened={inOulet}

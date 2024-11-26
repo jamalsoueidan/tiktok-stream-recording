@@ -8,12 +8,14 @@ import {
   Grid,
   Group,
   Image,
+  Loader,
   rem,
   Stack,
   Text,
   Title,
   UnstyledButton,
 } from "@mantine/core";
+import { useInViewport } from "@mantine/hooks";
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 
@@ -49,6 +51,14 @@ export default function Index() {
     updateLoggedInDate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const { ref, inViewport } = useInViewport();
+
+  useEffect(() => {
+    if (inViewport && status === "CanLoadMore") {
+      loadMore(10);
+    }
+  }, [inViewport, loadMore, status]);
 
   return !results.length ? (
     <Stack justify="center">
@@ -143,13 +153,9 @@ export default function Index() {
           </Grid.Col>
         ))}
       </Grid>
-      {status === "CanLoadMore" ? (
-        <Flex mt="md">
-          <Button onClick={() => loadMore(10)} fullWidth>
-            Load More
-          </Button>
-        </Flex>
-      ) : null}
+      <Flex mt="md" ref={ref}>
+        {status === "LoadingMore" ? <Loader /> : null}
+      </Flex>
     </>
   );
 }
