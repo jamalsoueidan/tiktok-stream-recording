@@ -51,7 +51,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Authenticated>
               <Flex>
                 <LeftNavigation />
-                <Container fluid>{children}</Container>
+                <Container fluid w="100%">
+                  {children}
+                </Container>
               </Flex>
             </Authenticated>
             <Unauthenticated>
